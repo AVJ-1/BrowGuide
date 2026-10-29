@@ -1,24 +1,224 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f7e9e5"><title>BrowGuide — Find your brow shape</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7e9e5">
+<title>BrowGuide — Brow improvement guide</title>
 <style>
-:root{--pink:#b96d78;--ink:#34262a;--soft:#fff8f6;--line:#ead2d1}*{box-sizing:border-box}body{margin:0;background:var(--soft);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:23px 18px 18px;text-align:center;background:#f7e9e5;border-bottom:1px solid var(--line)}h1{margin:0;font-size:clamp(28px,6vw,38px)}header p{margin:7px auto 0;max-width:560px;font-size:14px;line-height:1.45}main{max-width:900px;margin:0 auto;padding:15px;display:grid;gap:13px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 4px 16px #7d43430b}h2{font-size:17px;margin:0 0 10px}.actions{display:flex;flex-wrap:wrap;gap:9px}button,.filebutton{font:inherit;font-weight:650;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}.primary{background:var(--pink);color:white}.secondary,.filebutton.secondary{background:#f7e9e5;color:var(--ink)}button:disabled{opacity:.5;cursor:not-allowed}.filebutton input{display:none}#stage{position:relative;width:100%;min-height:240px;max-height:70vh;background:#f3e6e3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}#photo{display:block;width:100%;height:auto;max-height:70vh;object-fit:contain}[hidden]{display:none!important}#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.empty{padding:35px 22px;text-align:center;color:#7b6265}.small{font-size:12px;color:#78656a;line-height:1.5}.status{padding:10px 12px;background:#fff4f3;border-radius:12px;font-size:13px;line-height:1.45;margin-top:10px}#recommendation{font-size:14px;line-height:1.55;margin:0}select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px;background:white;width:100%}label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:13px}@media(min-width:720px){main{grid-template-columns:1.1fr .9fr;align-items:start}.photo-panel{grid-row:span 3}}footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
-</style></head><body>
-<header><h1>♡ BrowGuide</h1><p>Use the live camera as a mirror. Capture a frame and BrowGuide will outline a suggested area to fill in your eyebrows, right inside the app.</p></header>
+:root{--pink:#b96d78;--ink:#34262a;--soft:#fff8f6;--line:#ead2d1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:22px 16px 17px;text-align:center;background:#f7e9e5;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:clamp(28px,6vw,38px);letter-spacing:-1px}
+header p{margin:7px auto 0;max-width:620px;font-size:14px;line-height:1.45}
+main{max-width:960px;margin:0 auto;padding:14px;display:grid;gap:13px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 4px 16px #7d43430b}
+h2{font-size:17px;margin:0 0 10px}
+.actions{display:flex;flex-wrap:wrap;gap:9px}
+button,.filebutton{font:inherit;font-weight:650;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--pink);color:white}.secondary,.filebutton.secondary{background:#f7e9e5;color:var(--ink)}
+.filebutton input{display:none}
+#stage{position:relative;width:100%;min-height:240px;max-height:72vh;background:#f3e6e3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#photo{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain}
+#liveVideo{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain;transform:scaleX(-1)}
+[hidden]{display:none!important}
+#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.empty{padding:35px 22px;text-align:center;color:#7b6265}
+.small{font-size:12px;color:#78656a;line-height:1.5}
+.status{padding:10px 12px;background:#fff4f3;border-radius:12px;font-size:13px;line-height:1.45;margin-top:10px}
+#recommendation{font-size:14px;line-height:1.55;margin:0}
+select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px;background:white;width:100%}
+label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.legend span{display:flex;align-items:center;gap:7px;font-size:12px}
+.swatch{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid #0002}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.toggles label{display:flex;align-items:center;gap:8px;font-weight:500;margin:0;background:#fff8f6;padding:9px;border-radius:10px}
+.toggles input{width:17px;height:17px}
+@media(min-width:760px){main{grid-template-columns:1.1fr .9fr;align-items:start}.photo-panel{grid-row:span 4}}
+footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
+</style>
+</head>
+<body>
+<header>
+<h1>♡ BrowGuide</h1>
+<p>Preview brow shapes and see a colour-coded guide to areas you may want to fill, define or tidy. Your photo stays in this browser session.</p>
+</header>
 <main>
-<section class="panel photo-panel"><h2>1. Use your live mirror camera or choose a photo</h2><div class="actions"><label class="filebutton secondary">Choose a photo<input type="file" id="fileInput" accept="image/*" hidden></label><button class="primary" id="startCamera">📷 Start live camera</button><button class="secondary" id="switchCamera" disabled>↻ Switch camera</button><button class="secondary" id="capture" disabled>Use this frame</button><button class="secondary" id="stopCamera" disabled>Stop camera</button><button class="primary" id="analyze" disabled>Detect my brows</button></div><p class="small">The front-camera preview is mirrored. Capture a frame, then detect your brows. Frames are processed in your browser.</p><div id="stage"><div class="empty" id="empty">Tap “Start live camera” to use the mirror, or choose a photo.</div><video id="liveVideo" autoplay playsinline muted hidden style="display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;transform:scaleX(-1)"></video><img id="photo" alt="Captured face frame" hidden><svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden></svg></div><div class="status" id="status" role="status" aria-live="polite">Start the live mirror camera, capture a frame, then tap “Detect my brows”.</div></section>
-<section class="panel"><h2>2. Your recommendation</h2><p id="recommendation">Your recommended brow shape will appear here after detection.</p></section>
-<section class="panel"><h2>3. Cover natural brows & preview a shape</h2><div class="controls"><div><label for="style">Brow shape</label><select id="style"><option value="natural">Best starting point: natural soft arch</option><option value="straight">Straighter brow</option><option value="arched">More defined arch</option><option value="rounded">Soft rounded arch</option></select></div><div><label for="color">Guide color</label><select id="color"><option value="#8b514c">Rose brown</option><option value="#65443f">Dark brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option></select></div></div><p class="small">The cover is only a rough visual mock-up, not perfect AI skin retouching.</p><label style="display:flex;align-items:center;gap:8px;margin:12px 0"><input id="eraseBrows" type="checkbox" checked style="width:18px;height:18px"> Cover natural eyebrows in preview</label><div class="actions"><button class="primary" id="showDiagram" disabled>Show brow diagram in app</button><button class="secondary" id="clear">Remove photo</button></div></section></main><footer>Use the outline as a makeup guide, not as a grooming instruction. The app does not download the finished diagram.</footer>
+<section class="panel photo-panel">
+<h2>1. Live mirror or choose a photo</h2>
+<div class="actions">
+<label class="filebutton secondary">Choose a photo<input type="file" id="fileInput" accept="image/*"></label>
+<button class="primary" id="startCamera">📷 Start live camera</button>
+<button class="secondary" id="switchCamera" disabled>↻ Switch camera</button>
+<button class="secondary" id="capture" disabled>Use this frame</button>
+<button class="secondary" id="stopCamera" disabled>Stop camera</button>
+<button class="primary" id="analyze" disabled>Analyze my brows</button>
+</div>
+<p class="small">The front camera is mirrored like a mirror. Capture a still frame or choose a photo, then analyze it. Use a clear, straight-on photo with both brows visible and even lighting.</p>
+<div id="stage">
+<div class="empty" id="empty">Start the camera or choose a photo to begin.</div>
+<video id="liveVideo" autoplay playsinline muted hidden></video>
+<img id="photo" alt="Your face preview" hidden>
+<svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden></svg>
+</div>
+<div class="status" id="status">Allow camera access if prompted. Analysis runs in your browser after the face model loads.</div>
+</section>
+
+<section class="panel">
+<h2>2. Brow recommendation</h2>
+<p id="recommendation">Your brow guide will appear here after analysis.</p>
+</section>
+
+<section class="panel">
+<h2>3. Areas to improve</h2>
+<p class="small">The coloured zones are approximate placement suggestions based on detected facial landmarks. They do not identify individual hairs.</p>
+<div class="legend">
+<span><i class="swatch" style="background:#d96b9a"></i> Fill / add fullness</span>
+<span><i class="swatch" style="background:#e8ad48"></i> Edge tidy guide</span>
+<span><i class="swatch" style="background:#68a9a0"></i> Sparse-area guide</span>
+<span><i class="swatch" style="background:#8c83c9"></i> Trim-check zone</span>
+</div>
+<div class="toggles">
+<label><input type="checkbox" id="showFill" checked> Show fill areas</label>
+<label><input type="checkbox" id="showTidy" checked> Show edge tidy guide</label>
+<label><input type="checkbox" id="showSparse" checked> Show sparse guide</label>
+<label><input type="checkbox" id="showTrim" checked> Show trim-check zone</label>
+</div>
+</section>
+
+<section class="panel">
+<h2>4. Try a different brow shape</h2>
+<div class="controls">
+<div><label for="style">Brow shape</label><select id="style"><option value="natural">Natural soft arch</option><option value="straight">Straighter brow</option><option value="arched">More defined arch</option><option value="rounded">Soft rounded arch</option></select></div>
+<div><label for="color">Brow colour</label><select id="color"><option value="#8b514c">Rose brown</option><option value="#65443f">Dark brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option></select></div>
+</div>
+<label style="display:flex;align-items:center;gap:8px;margin:12px 0"><input id="eraseBrows" type="checkbox" checked style="width:18px;height:18px"> Approximate cover of natural brows</label>
+<p class="small">The cover is a soft sampled-colour stroke, not true skin reconstruction or a perfect eyebrow eraser. The suggested brow is a visual mock-up.</p>
+<div class="actions"><button class="primary" id="showDiagram" disabled>Show brow guide in app</button><button class="secondary" id="clear">Remove photo</button></div>
+</section>
+</main>
+<footer>Beauty suggestions are personal. Check the guide in a mirror and make small changes; do not pluck or trim based only on these estimated zones. Images are not uploaded by this page, but your browser and hosting platform have their own privacy behaviour.</footer>
+
 <script type="module">
-const $=id=>document.getElementById(id);const photo=$('photo'),overlay=$('overlay'),empty=$('empty'),status=$('status');let faceLandmarker=null,FaceLandmarker=null,FilesetResolver=null,imageUrl=null,detected=null,cameraStream=null,facingMode='user';
-const styles={natural:{name:'Natural soft arch',lift:0,thickness:1},straight:{name:'Straighter brow',lift:1.2,thickness:.9},arched:{name:'Defined arch',lift:-1.2,thickness:1.05},rounded:{name:'Soft rounded arch',lift:-.4,thickness:1}};
-async function getDetector(){if(faceLandmarker)return faceLandmarker;status.textContent='Loading eyebrow detection… this may take a little while. Keep the page open.';try{const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');FaceLandmarker=vision.FaceLandmarker;FilesetResolver=vision.FilesetResolver;const files=await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');faceLandmarker=await FaceLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'CPU'},runningMode:'IMAGE',numFaces:1});return faceLandmarker}catch(e){console.error(e);throw new Error('Could not load the online face-detection model. Check your internet connection and try again. If it keeps failing, the browser may be blocking the model website.')}}
-async function startCamera(){try{stopCamera();if(!navigator.mediaDevices?.getUserMedia){status.textContent='Camera access is not supported here. Open the GitHub Pages website directly in Safari or Chrome.';return}cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facingMode},width:{ideal:1280},height:{ideal:720}},audio:false});const v=$('liveVideo');v.srcObject=cameraStream;v.hidden=false;photo.hidden=true;overlay.hidden=true;empty.hidden=true;await v.play();$('startCamera').disabled=true;$('switchCamera').disabled=false;$('capture').disabled=false;$('stopCamera').disabled=false;status.textContent='Mirror camera is on. Center your face, then tap Use this frame.'}catch(e){status.textContent=e.name==='NotAllowedError'?'Camera permission was denied. Allow camera access in browser settings and try again.':'Could not start the camera. Close other camera apps and try again.'}}
-function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}const v=$('liveVideo');if(v){v.pause();v.srcObject=null;v.hidden=true}$('startCamera').disabled=false;$('switchCamera').disabled=true;$('capture').disabled=true;$('stopCamera').disabled=true}
-function captureFrame(){const v=$('liveVideo');if(!cameraStream||!v.videoWidth){status.textContent='Start the camera and wait for your face to appear first.';return}const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');if(facingMode==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(v,0,0,c.width,c.height);c.toBlob(b=>{if(!b){status.textContent='Could not capture this frame. Please try again.';return}if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(b);detected=null;photo.onload=()=>{photo.hidden=false;overlay.hidden=true;v.hidden=true;empty.hidden=true;$('analyze').disabled=false;$('showDiagram').disabled=true;$('recommendation').textContent='Frame captured. Tap Detect my brows to analyze it.';status.textContent='Frame captured. Tap Detect my brows. If detection fails, a message will appear here.'};photo.src=imageUrl},'image/jpeg',.92)}
-function point(i,lm){const r=$('stage').getBoundingClientRect(),p=photo.getBoundingClientRect();return{x:(lm[i].x*p.width+p.left-r.left)/r.width*100,y:(lm[i].y*p.height+p.top-r.top)/r.height*100}}
-function draw(){if(!detected)return;overlay.innerHTML='';overlay.setAttribute('viewBox','0 0 100 100');const color=$('color').value,style=styles[$('style').value]||styles.natural;for(const ids of [[70,63,105,66,107],[336,296,334,293,300]]){let pts=ids.map(i=>point(i,detected)).sort((a,b)=>a.x-b.x);if(pts.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))continue;const mid=pts[Math.floor(pts.length/2)];const upper=pts.map((p,i)=>`${i?'L':'M'} ${p.x} ${p.y+style.lift*(i===2?1:0)}`).join(' ');const width=Math.max(1,Math.min(3.2,(pts[pts.length-1].x-pts[0].x)*.12))*style.thickness;const lower=pts.slice().reverse().map(p=>`L ${p.x} ${p.y+width}`).join(' ');if($('eraseBrows').checked){const mask=document.createElementNS('http://www.w3.org/2000/svg','path');mask.setAttribute('d',upper);mask.setAttribute('fill','none');mask.setAttribute('stroke','#cda99a');mask.setAttribute('stroke-width','3.5');mask.setAttribute('stroke-linecap','round');mask.setAttribute('opacity','.7');overlay.appendChild(mask)}const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',upper+' '+lower+' Z');path.setAttribute('fill',color);path.setAttribute('fill-opacity','.18');path.setAttribute('stroke',color);path.setAttribute('stroke-width','.45');path.setAttribute('stroke-dasharray','1.2 .65');overlay.appendChild(path)}overlay.hidden=false;$('showDiagram').disabled=false}
-async function analyze(){if(!photo.src||photo.hidden){status.textContent='First capture a frame or choose a photo.';return}$('analyze').disabled=true;status.textContent='Starting detection…';try{const detector=await getDetector();status.textContent='Looking for your face…';const result=detector.detect(photo);if(!result.faceLandmarks?.length){detected=null;overlay.hidden=true;status.textContent='I could not detect a face. Face the camera straight on, use bright even lighting, and keep both eyebrows visible.';$('recommendation').textContent='No face detected. Try another frame.';return}detected=result.faceLandmarks[0];draw();$('recommendation').textContent='Suggested starting point: natural soft arch. The dashed outlines show an approximate area to fill. Try other shapes and choose the one you prefer.';status.textContent='Face detected! Your brow fill-in outlines are shown on the picture above.'}catch(e){console.error(e);status.textContent=e.message||'Detection failed. Refresh the page and try again.'}finally{$('analyze').disabled=false}}
-$('fileInput').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;stopCamera();if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(f);detected=null;photo.onload=()=>{photo.hidden=false;overlay.hidden=true;empty.hidden=true;$('analyze').disabled=false;$('showDiagram').disabled=true;$('recommendation').textContent='Photo ready. Tap Detect my brows.';status.textContent='Photo loaded. Tap Detect my brows.'};photo.src=imageUrl});$('startCamera').addEventListener('click',startCamera);$('switchCamera').addEventListener('click',async()=>{facingMode=facingMode==='user'?'environment':'user';await startCamera()});$('capture').addEventListener('click',captureFrame);$('stopCamera').addEventListener('click',()=>{stopCamera();status.textContent='Camera stopped.'});$('analyze').addEventListener('click',analyze);$('style').addEventListener('change',()=>{if(detected)draw()});$('eraseBrows').addEventListener('change',()=>{if(detected)draw()});$('color').addEventListener('change',()=>{if(detected)draw()});$('clear').addEventListener('click',()=>{stopCamera();if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=null;detected=null;photo.removeAttribute('src');photo.hidden=true;overlay.hidden=true;overlay.innerHTML='';empty.hidden=false;$('analyze').disabled=true;$('showDiagram').disabled=true;$('status').textContent='Tap Start live camera to begin.';$('recommendation').textContent='Your recommended brow shape will appear here after detection.'});$('showDiagram').addEventListener('click',()=>{if(!detected||photo.hidden){status.textContent='Capture a frame or choose a photo, then tap Detect my brows first.';return}draw();overlay.hidden=false;$('stage').scrollIntoView({behavior:'smooth',block:'center'});status.textContent='Your brow diagram is displayed inside BrowGuide, not downloaded.'});
-</script></body></html>
+const $=id=>document.getElementById(id);
+const photo=$('photo'),overlay=$('overlay'),status=$('status');
+let detector=null, photoURL=null, landmarks=null, stream=null, facing='user', browColor=$('color').value;
+const NS='http://www.w3.org/2000/svg';
+const styleLift={natural:0,straight:.5,arched:-1.2,rounded:-.5};
+
+async function loadDetector(){
+ if(detector)return detector;
+ status.textContent='Loading face landmark model. This may take a little while…';
+ const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');
+ const files=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+ detector=await vision.FaceLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'CPU'},runningMode:'IMAGE',numFaces:1});
+ return detector;
+}
+function stopCamera(){
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+ const v=$('liveVideo');v.pause();v.srcObject=null;v.hidden=true;
+ $('startCamera').disabled=false;$('switchCamera').disabled=true;$('capture').disabled=true;$('stopCamera').disabled=true;
+}
+async function startCamera(){
+ try{
+  stopCamera();
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('This browser does not provide camera access. Open the secure GitHub Pages address in Safari or Chrome.');
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}},audio:false});
+  const v=$('liveVideo');v.srcObject=stream;v.hidden=false;photo.hidden=true;overlay.hidden=true;$('empty').hidden=true;await v.play();
+  $('startCamera').disabled=true;$('switchCamera').disabled=false;$('capture').disabled=false;$('stopCamera').disabled=false;
+  status.textContent='Mirror camera is on. Capture a frame when your face and both brows are centred.';
+ }catch(e){status.textContent=e.name==='NotAllowedError'?'Camera permission was not allowed. Change this site’s camera permission in your browser settings, then try again.':e.message||'Could not start camera.';}
+}
+function showPhoto(url){
+ photo.onload=()=>{photo.hidden=false;$('liveVideo').hidden=true;$('empty').hidden=true;overlay.hidden=true;$('analyze').disabled=false;$('showDiagram').disabled=true;landmarks=null;$('recommendation').textContent='Photo ready. Tap Analyze my brows.';status.textContent='Photo ready. Tap Analyze my brows.';};
+ photo.src=url;
+}
+function capture(){
+ const v=$('liveVideo');if(!stream||!v.videoWidth){status.textContent='Wait until the camera image appears, then capture.';return;}
+ const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');
+ if(facing==='user'){x.translate(c.width,0);x.scale(-1,1);}x.drawImage(v,0,0);
+ c.toBlob(b=>{if(!b){status.textContent='Could not capture frame.';return;}if(photoURL)URL.revokeObjectURL(photoURL);photoURL=URL.createObjectURL(b);showPhoto(photoURL);},'image/jpeg',.92);
+}
+function pos(i){
+ const p=landmarks[i], stage=$('stage').getBoundingClientRect(), r=photo.getBoundingClientRect();
+ return {x:(r.left-stage.left+p.x*r.width)/stage.width*100,y:(r.top-stage.top+p.y*r.height)/stage.height*100};
+}
+function svg(tag,attrs){
+ const el=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);overlay.appendChild(el);return el;
+}
+function pathFrom(arr){return arr.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');}
+function render(){
+ if(!landmarks)return;
+ overlay.innerHTML='';
+ // MediaPipe face-mesh eyebrow landmarks: these trace the upper and lower brow contours.
+ const brows=[[70,63,105,66,107,55,65,52,53],[336,296,334,293,300,285,295,282,283]];
+ const style=$('style').value, lift=styleLift[style]||0;
+ for(const ids of brows){
+  let pts=ids.map(pos).sort((a,b)=>a.x-b.x);
+  if(pts.length<5)continue;
+  const upper=pts.slice(0,5), lower=pts.slice(5).reverse();
+  const center=upper[Math.floor(upper.length/2)];
+  const adjusted=upper.map((p,i)=>({x:p.x,y:p.y+(i===2?lift:0)}));
+  const width=Math.max(1.0,Math.min(2.4,(adjusted[4].x-adjusted[0].x)*.10));
+  const lowerEdge=adjusted.map(p=>({x:p.x,y:p.y+width}));
+  const fillPath=pathFrom(adjusted)+' '+lowerEdge.slice().reverse().map(p=>'L'+p.x+' '+p.y).join(' ')+' Z';
+  if($('showFill').checked){
+   svg('path',{d:fillPath,fill:browColor,'fill-opacity':'.24',stroke:browColor,'stroke-width':'.35','stroke-dasharray':'1 0.55'});
+  }
+  if($('showTidy').checked){
+   svg('path',{d:pathFrom(adjusted),fill:'none',stroke:'#e8ad48','stroke-width':'.75','stroke-linecap':'round','stroke-dasharray':'1.2 .7'});
+   svg('path',{d:pathFrom(lowerEdge),fill:'none',stroke:'#e8ad48','stroke-width':'.75','stroke-linecap':'round','stroke-dasharray':'1.2 .7'});
+  }
+  if($('showSparse').checked){
+   // A small central dotted guide indicates where extra pencil strokes may be considered.
+   const dots= [0.32,0.42,0.52,0.62,0.72];
+   dots.forEach(t=>{const x=adjusted[0].x+(adjusted[4].x-adjusted[0].x)*t;const y=center.y+width*.45;
+    svg('circle',{cx:x,cy:y,r:'.34',fill:'#68a9a0','fill-opacity':'.95'});
+   });
+  }
+  if($('showTrim').checked){
+   const d=`M ${adjusted[0].x} ${adjusted[0].y-1.0} L ${adjusted[4].x} ${adjusted[4].y-1.0}`;
+   svg('path',{d,fill:'none',stroke:'#8c83c9','stroke-width':'.65','stroke-dasharray':'.8 .8'});
+  }
+  [['Start',adjusted[0]],['Arch',center],['End',adjusted[4]]].forEach(([label,p])=>{
+   svg('circle',{cx:p.x,cy:p.y,r:'.45',fill:'#fff',stroke:browColor,'stroke-width':'.3'});
+   const t=svg('text',{x:p.x,y:p.y-1.1,'font-size':'1.6','text-anchor':'middle',fill:'#fff',stroke:'#34262a','stroke-width':'.12','paint-order':'stroke'});t.textContent=label;
+  });
+  if($('eraseBrows').checked){
+   const d=pathFrom(adjusted);
+   svg('path',{d,fill:'none',stroke:'#d9b7a8','stroke-width':'2.7','stroke-linecap':'round','stroke-linejoin':'round',opacity:'.48'});
+  }
+ }
+ overlay.hidden=false;$('showDiagram').disabled=false;
+}
+async function analyze(){
+ if(photo.hidden||!photo.complete)return;
+ $('analyze').disabled=true;
+ try{
+  status.textContent='Finding face landmarks…';
+  const model=await loadDetector(),result=model.detect(photo);
+  if(!result.faceLandmarks?.length){landmarks=null;overlay.hidden=true;status.textContent='No face found. Try a straight-on photo with better lighting and both brows visible.';$('recommendation').textContent='No face was detected. Try another photo.';return;}
+  landmarks=result.faceLandmarks[0];render();
+  $('recommendation').textContent='A natural soft arch is a gentle starting point. Pink marks a suggested fill area, gold marks the brow edges as a tidy-up reference, teal dots mark a possible area for extra pencil strokes, and purple marks an upper trim-check boundary. These are broad visual estimates, not hair-by-hair instructions.';
+  status.textContent='Face landmarks detected. Your colour-coded guide is shown over the photo. Adjust the toggles and brow style to compare.';
+ }catch(e){console.error(e);status.textContent='The face model did not load. Check your internet connection and reload the page. If it continues, the model service may be unavailable.';}
+ finally{$('analyze').disabled=false;}
+}
+$('startCamera').addEventListener('click',startCamera);
+$('switchCamera').addEventListener('click',()=>{facing=facing==='user'?'environment':'user';startCamera();});
+$('capture').addEventListener('click',capture);
+$('stopCamera').addEventListener('click',()=>{stopCamera();status.textContent='Camera stopped.';});
+$('fileInput').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;stopCamera();if(photoURL)URL.revokeObjectURL(photoURL);photoURL=URL.createObjectURL(f);showPhoto(photoURL);});
+$('analyze').addEventListener('click',analyze);
+['style','eraseBrows','showFill','showTidy','showSparse','showTrim'].forEach(id=>$(id).addEventListener('change',()=>{if(landmarks)render();}));
+$('color').addEventListener('change',()=>{browColor=$('color').value;if(landmarks)render();});
+$('showDiagram').addEventListener('click',()=>{if(landmarks){render();$('stage').scrollIntoView({behavior:'smooth',block:'center'});status.textContent='The diagram is displayed inside BrowGuide. It has not been downloaded.';}});
+$('clear').addEventListener('click',()=>{stopCamera();if(photoURL)URL.revokeObjectURL(photoURL);photoURL=null;landmarks=null;photo.removeAttribute('src');photo.hidden=true;overlay.innerHTML='';overlay.hidden=true;$('empty').hidden=false;$('analyze').disabled=true;$('showDiagram').disabled=true;$('recommendation').textContent='Your brow guide will appear here after analysis.';status.textContent='Choose a photo or start the camera to begin.';});
+window.addEventListener('resize',()=>{if(landmarks)render();});
+</script>
+</body>
+</html>
