@@ -21,10 +21,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:var(--pink);color:white}.secondary,.filebutton.secondary{background:#f7e9e5;color:var(--ink)}
 .filebutton input{display:none}
 #stage{position:relative;width:100%;min-height:240px;max-height:72vh;background:#f3e6e3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}
-#photo{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain}
+#photo{display:block;position:relative;z-index:1;width:100%;height:auto;max-height:72vh;object-fit:contain}
 #liveVideo{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain;transform:scaleX(-1)}
 [hidden]{display:none!important}
-#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
 .empty{padding:35px 22px;text-align:center;color:#7b6265}
 .small{font-size:12px;color:#78656a;line-height:1.5}
 .status{padding:10px 12px;background:#fff4f3;border-radius:12px;font-size:13px;line-height:1.45;margin-top:10px}
@@ -63,7 +63,7 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 <div class="empty" id="empty">Start the camera or choose a photo to begin.</div>
 <video id="liveVideo" autoplay playsinline muted hidden></video>
 <img id="photo" alt="Your face preview" hidden>
-<svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden></svg>
+<canvas id="overlay" hidden aria-label="Brow improvement overlay"></canvas>
 </div>
 <div class="status" id="status">Allow camera access if prompted. Analysis runs in your browser after the face model loads.</div>
 </section>
@@ -107,12 +107,10 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 const $=id=>document.getElementById(id);
 const photo=$('photo'),overlay=$('overlay'),status=$('status');
 let detector=null, photoURL=null, landmarks=null, stream=null, facing='user', browColor=$('color').value;
-const NS='http://www.w3.org/2000/svg';
-const styleLift={natural:0,straight:.5,arched:-1.2,rounded:-.5};
-
+const styleLift={natural:0,straight:0.2,arched:-1.0,rounded:-0.45};
 async function loadDetector(){
  if(detector)return detector;
- status.textContent='Loading face landmark model. This may take a little while…';
+ status.textContent='Loading the face landmark model…';
  const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');
  const files=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
  detector=await vision.FaceLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'CPU'},runningMode:'IMAGE',numFaces:1});
@@ -126,74 +124,69 @@ function stopCamera(){
 async function startCamera(){
  try{
   stopCamera();
-  if(!navigator.mediaDevices?.getUserMedia)throw new Error('This browser does not provide camera access. Open the secure GitHub Pages address in Safari or Chrome.');
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('Camera access is unavailable in this browser. Open your secure GitHub Pages address in Safari or Chrome.');
   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}},audio:false});
   const v=$('liveVideo');v.srcObject=stream;v.hidden=false;photo.hidden=true;overlay.hidden=true;$('empty').hidden=true;await v.play();
   $('startCamera').disabled=true;$('switchCamera').disabled=false;$('capture').disabled=false;$('stopCamera').disabled=false;
-  status.textContent='Mirror camera is on. Capture a frame when your face and both brows are centred.';
- }catch(e){status.textContent=e.name==='NotAllowedError'?'Camera permission was not allowed. Change this site’s camera permission in your browser settings, then try again.':e.message||'Could not start camera.';}
+  status.textContent='Mirror camera is on. Centre your face and capture a frame.';
+ }catch(e){status.textContent=e.message||'Could not start camera. Check camera permission.';}
 }
 function showPhoto(url){
  photo.onload=()=>{photo.hidden=false;$('liveVideo').hidden=true;$('empty').hidden=true;overlay.hidden=true;$('analyze').disabled=false;$('showDiagram').disabled=true;landmarks=null;$('recommendation').textContent='Photo ready. Tap Analyze my brows.';status.textContent='Photo ready. Tap Analyze my brows.';};
  photo.src=url;
 }
 function capture(){
- const v=$('liveVideo');if(!stream||!v.videoWidth){status.textContent='Wait until the camera image appears, then capture.';return;}
+ const v=$('liveVideo');if(!stream||!v.videoWidth){status.textContent='Wait for the camera image, then capture.';return;}
  const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');
  if(facing==='user'){x.translate(c.width,0);x.scale(-1,1);}x.drawImage(v,0,0);
  c.toBlob(b=>{if(!b){status.textContent='Could not capture frame.';return;}if(photoURL)URL.revokeObjectURL(photoURL);photoURL=URL.createObjectURL(b);showPhoto(photoURL);},'image/jpeg',.92);
 }
-function pos(i){
- const p=landmarks[i], stage=$('stage').getBoundingClientRect(), r=photo.getBoundingClientRect();
- return {x:(r.left-stage.left+p.x*r.width)/stage.width*100,y:(r.top-stage.top+p.y*r.height)/stage.height*100};
-}
-function svg(tag,attrs){
- const el=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);overlay.appendChild(el);return el;
-}
-function pathFrom(arr){return arr.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');}
 function render(){
- if(!landmarks)return;
- overlay.innerHTML='';
- // MediaPipe face-mesh eyebrow landmarks: these trace the upper and lower brow contours.
- const brows=[[70,63,105,66,107,55,65,52,53],[336,296,334,293,300,285,295,282,283]];
- const style=$('style').value, lift=styleLift[style]||0;
- for(const ids of brows){
-  let pts=ids.map(pos).sort((a,b)=>a.x-b.x);
-  if(pts.length<5)continue;
-  const upper=pts.slice(0,5), lower=pts.slice(5).reverse();
-  const center=upper[Math.floor(upper.length/2)];
-  const adjusted=upper.map((p,i)=>({x:p.x,y:p.y+(i===2?lift:0)}));
-  const width=Math.max(1.0,Math.min(2.4,(adjusted[4].x-adjusted[0].x)*.10));
-  const lowerEdge=adjusted.map(p=>({x:p.x,y:p.y+width}));
-  const fillPath=pathFrom(adjusted)+' '+lowerEdge.slice().reverse().map(p=>'L'+p.x+' '+p.y).join(' ')+' Z';
+ if(!landmarks || !photo.complete || !photo.naturalWidth)return false;
+ const stage=$('stage').getBoundingClientRect(), r=photo.getBoundingClientRect();
+ const canvas=overlay, dpr=window.devicePixelRatio||1;
+ canvas.width=Math.max(1,Math.round(stage.width*dpr));canvas.height=Math.max(1,Math.round(stage.height*dpr));
+ canvas.style.width='100%';canvas.style.height='100%';
+ const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,stage.width,stage.height);
+ // Coordinates are mapped from MediaPipe's normalized face points into the displayed photo.
+ const point=i=>{const p=landmarks[i];return {x:r.left-stage.left+p.x*r.width,y:r.top-stage.top+p.y*r.height};};
+ const browSets=[[70,63,105,66,107],[336,296,334,293,300]];
+ const lift=styleLift[$('style').value]||0;
+ let drawn=0;
+ for(const ids of browSets){
+  const pts=ids.map(point).sort((a,b)=>a.x-b.x);
+  if(pts.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))continue;
+  const centerY=pts.reduce((sum,p)=>sum+p.y,0)/pts.length;
+  const adjusted=pts.map((p,i)=>({x:p.x,y:p.y+(i===2?lift*r.height/100:0)}));
+  const thickness=Math.max(5,r.width*.009);
+  const upper=adjusted.map(p=>({x:p.x,y:p.y-thickness*.45}));
+  const lower=adjusted.map(p=>({x:p.x,y:p.y+thickness*.65}));
   if($('showFill').checked){
-   svg('path',{d:fillPath,fill:browColor,'fill-opacity':'.24',stroke:browColor,'stroke-width':'.35','stroke-dasharray':'1 0.55'});
+   ctx.beginPath();upper.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+   lower.slice().reverse().forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();
+   ctx.fillStyle='rgba(217,107,154,.48)';ctx.fill();
   }
   if($('showTidy').checked){
-   svg('path',{d:pathFrom(adjusted),fill:'none',stroke:'#e8ad48','stroke-width':'.75','stroke-linecap':'round','stroke-dasharray':'1.2 .7'});
-   svg('path',{d:pathFrom(lowerEdge),fill:'none',stroke:'#e8ad48','stroke-width':'.75','stroke-linecap':'round','stroke-dasharray':'1.2 .7'});
+   ctx.save();ctx.strokeStyle='#e8ad48';ctx.lineWidth=2.5;ctx.setLineDash([6,4]);
+   [upper,lower].forEach(line=>{ctx.beginPath();line.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();});ctx.restore();
   }
   if($('showSparse').checked){
-   // A small central dotted guide indicates where extra pencil strokes may be considered.
-   const dots= [0.32,0.42,0.52,0.62,0.72];
-   dots.forEach(t=>{const x=adjusted[0].x+(adjusted[4].x-adjusted[0].x)*t;const y=center.y+width*.45;
-    svg('circle',{cx:x,cy:y,r:'.34',fill:'#68a9a0','fill-opacity':'.95'});
-   });
+   ctx.fillStyle='#168f83';
+   [.25,.38,.5,.62,.75].forEach(t=>{const x=adjusted[0].x+(adjusted[4].x-adjusted[0].x)*t;ctx.beginPath();ctx.arc(x,centerY,3.2,0,Math.PI*2);ctx.fill();});
   }
   if($('showTrim').checked){
-   const d=`M ${adjusted[0].x} ${adjusted[0].y-1.0} L ${adjusted[4].x} ${adjusted[4].y-1.0}`;
-   svg('path',{d,fill:'none',stroke:'#8c83c9','stroke-width':'.65','stroke-dasharray':'.8 .8'});
+   ctx.save();ctx.strokeStyle='#8c83c9';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();
+   adjusted.forEach((p,i)=>i?ctx.lineTo(p.x,p.y-thickness*1.25):ctx.moveTo(p.x,p.y-thickness*1.25));ctx.stroke();ctx.restore();
   }
-  [['Start',adjusted[0]],['Arch',center],['End',adjusted[4]]].forEach(([label,p])=>{
-   svg('circle',{cx:p.x,cy:p.y,r:'.45',fill:'#fff',stroke:browColor,'stroke-width':'.3'});
-   const t=svg('text',{x:p.x,y:p.y-1.1,'font-size':'1.6','text-anchor':'middle',fill:'#fff',stroke:'#34262a','stroke-width':'.12','paint-order':'stroke'});t.textContent=label;
-  });
   if($('eraseBrows').checked){
-   const d=pathFrom(adjusted);
-   svg('path',{d,fill:'none',stroke:'#d9b7a8','stroke-width':'2.7','stroke-linecap':'round','stroke-linejoin':'round',opacity:'.48'});
+   ctx.save();ctx.strokeStyle='rgba(232,201,185,.78)';ctx.lineWidth=thickness*1.25;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
+   adjusted.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.restore();
   }
+  drawn++;
  }
- overlay.hidden=false;$('showDiagram').disabled=false;
+ overlay.hidden=false;
+ $('showDiagram').disabled=false;
+ return drawn>0;
 }
 async function analyze(){
  if(photo.hidden||!photo.complete)return;
@@ -204,7 +197,7 @@ async function analyze(){
   if(!result.faceLandmarks?.length){landmarks=null;overlay.hidden=true;status.textContent='No face found. Try a straight-on photo with better lighting and both brows visible.';$('recommendation').textContent='No face was detected. Try another photo.';return;}
   landmarks=result.faceLandmarks[0];render();
   $('recommendation').textContent='A natural soft arch is a gentle starting point. Pink marks a suggested fill area, gold marks the brow edges as a tidy-up reference, teal dots mark a possible area for extra pencil strokes, and purple marks an upper trim-check boundary. These are broad visual estimates, not hair-by-hair instructions.';
-  status.textContent='Face landmarks detected. Your colour-coded guide is shown over the photo. Adjust the toggles and brow style to compare.';
+  status.textContent=didDraw?'Face landmarks detected. Colour guides are drawn over both brow areas.':'Face detected, but the guide could not be positioned. Try a brighter, straight-on photo.';
  }catch(e){console.error(e);status.textContent='The face model did not load. Check your internet connection and reload the page. If it continues, the model service may be unavailable.';}
  finally{$('analyze').disabled=false;}
 }
@@ -217,7 +210,7 @@ $('analyze').addEventListener('click',analyze);
 ['style','eraseBrows','showFill','showTidy','showSparse','showTrim'].forEach(id=>$(id).addEventListener('change',()=>{if(landmarks)render();}));
 $('color').addEventListener('change',()=>{browColor=$('color').value;if(landmarks)render();});
 $('showDiagram').addEventListener('click',()=>{if(landmarks){render();$('stage').scrollIntoView({behavior:'smooth',block:'center'});status.textContent='The diagram is displayed inside BrowGuide. It has not been downloaded.';}});
-$('clear').addEventListener('click',()=>{stopCamera();if(photoURL)URL.revokeObjectURL(photoURL);photoURL=null;landmarks=null;photo.removeAttribute('src');photo.hidden=true;overlay.innerHTML='';overlay.hidden=true;$('empty').hidden=false;$('analyze').disabled=true;$('showDiagram').disabled=true;$('recommendation').textContent='Your brow guide will appear here after analysis.';status.textContent='Choose a photo or start the camera to begin.';});
+$('clear').addEventListener('click',()=>{stopCamera();if(photoURL)URL.revokeObjectURL(photoURL);photoURL=null;landmarks=null;photo.removeAttribute('src');photo.hidden=true;const cx=overlay.getContext('2d');cx.clearRect(0,0,overlay.width,overlay.height);overlay.hidden=true;$('empty').hidden=false;$('analyze').disabled=true;$('showDiagram').disabled=true;$('recommendation').textContent='Your brow guide will appear here after analysis.';status.textContent='Choose a photo or start the camera to begin.';});
 window.addEventListener('resize',()=>{if(landmarks)render();});
 </script>
 </body>
