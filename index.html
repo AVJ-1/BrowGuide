@@ -1,151 +1,223 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#fbe8ef">
-<title>BrowGuide — Find Your Brow Placement</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7e9e5">
+<title>BrowGuide — Try a brow style</title>
 <style>
-:root{--pink:#e83e8c;--pink-dark:#a82c63;--lav:#9550bd;--blue:#2687ed;--ink:#17213e;--muted:#5c6b85;--paper:#fff;--soft:#fff4f8;--line:#f0dfe7}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fff7fa 0,#fff 360px);line-height:1.5}
-header{background:#fbe8ef;border-bottom:1px solid #f5dbe6;padding:18px max(18px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:flex;align-items:center;gap:13px}.logo{font-size:40px;line-height:1}.brand h1{font-family:Georgia,serif;font-size:clamp(27px,4vw,43px);margin:0;letter-spacing:-1px}.brand p{margin:1px 0 0;color:#4e607a;font-size:14px}.pill{background:#f7d5e3;border-radius:99px;padding:10px 16px;color:#8d315c;font-weight:700;font-size:14px}
-main{max-width:1180px;margin:auto;padding:24px 18px 32px}.intro{text-align:center;padding:2px 0 22px}.intro h2{font-family:Georgia,serif;font-size:clamp(27px,4vw,42px);line-height:1.15;margin:5px 0 8px}.intro p{margin:5px auto;color:var(--muted);max-width:760px}
-.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:18px;align-items:start}
-.panel{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 7px 25px #8d315c0a;overflow:hidden}
-.face-panel{padding:12px}.illustration{position:relative;background:linear-gradient(135deg,#ead8cd,#f5e9df);border-radius:12px;overflow:hidden;min-height:310px;aspect-ratio:4/4.15;display:flex;align-items:center;justify-content:center}
-.face-svg{width:100%;height:100%;position:absolute;inset:0}.guide-lines{stroke:#fff;stroke-width:2;stroke-dasharray:5 5;opacity:.95;fill:none}.guide-dot{stroke:white;stroke-width:2}.guide-label{font-size:15px;font-weight:bold;fill:white}.marker{cursor:pointer;filter:drop-shadow(0 2px 2px #0003)}.marker:focus{outline:none}.marker:focus circle{stroke:#17213e;stroke-width:4}
-.marker-btns{display:flex;flex-wrap:wrap;gap:8px;padding:12px 2px 2px}.marker-btn{border:1px solid #eadce4;background:white;border-radius:99px;padding:9px 13px;font-weight:700;color:var(--ink);cursor:pointer}.marker-btn.active{background:var(--pink);border-color:var(--pink);color:white}.marker-btn[data-step="1"].active{background:var(--lav);border-color:var(--lav)}.marker-btn[data-step="2"].active{background:var(--blue);border-color:var(--blue)}
-.content{padding:21px}.content h3{font-size:23px;margin:0 0 16px}.step{display:grid;grid-template-columns:42px 1fr;gap:13px;margin:0 0 19px;align-items:start}.number{width:42px;height:42px;border-radius:50%;background:var(--pink);color:white;display:grid;place-items:center;font-size:20px;font-weight:bold}.step:nth-of-type(2) .number{background:var(--lav)}.step:nth-of-type(3) .number{background:var(--blue)}.step h4{margin:2px 0 4px;font-size:17px}.step p{margin:0;color:var(--muted);font-size:14px}.pink{color:var(--pink)}.purple{color:var(--lav)}.blue{color:var(--blue)}
-.tip{background:#fff1f7;border-radius:13px;padding:14px 15px;margin-top:16px}.tip h4{margin:0 0 7px;color:#b72d69;font-size:17px}.tip ul{padding-left:20px;margin:0;color:#53627c;font-size:14px}.tip li{padding:2px 0}
-.controls{display:flex;gap:9px;margin-top:17px}.action{border:0;border-radius:10px;padding:11px 16px;font-weight:bold;cursor:pointer;font-size:14px}.primary{background:var(--pink);color:white}.secondary{background:#f6edf1;color:#65455a}.face-shapes{margin-top:18px;padding:17px 19px}.face-shapes h3{font-size:18px;margin:0}.face-shapes p{margin:2px 0 11px;color:var(--muted);font-size:13px}.shape-list{display:flex;flex-wrap:wrap;gap:8px}.shape{border:1px solid #e7dfe5;background:#fff;border-radius:99px;padding:9px 15px;cursor:pointer;color:#56627a}.shape.selected{border:2px solid var(--pink);color:#bd2d6d;background:#fff5f9;font-weight:bold;padding:8px 14px}.shape-tip{font-size:14px;color:var(--muted);margin:12px 0 0}
-footer{text-align:center;background:#fbe8ef;padding:15px;color:#5c6077;font-size:13px}
-.note{font-size:12px;color:#758096;margin-top:11px}
-@media(max-width:760px){header{align-items:flex-start;padding:14px 16px}.pill{display:none}.layout{grid-template-columns:1fr}.intro{padding-bottom:17px}.content{padding:18px}.illustration{aspect-ratio:1/1;min-height:280px}.face-shapes{padding:15px}.brand p{font-size:12px}}
-@media(prefers-reduced-motion:no-preference){.panel{transition:box-shadow .2s}.action,.shape,.marker-btn{transition:transform .12s,background .12s}.action:active,.shape:active,.marker-btn:active{transform:scale(.98)}}
+:root{--pink:#b96d78;--ink:#34262a;--soft:#fff8f6;--line:#ead2d1}
+*{box-sizing:border-box}
+body{margin:0;background:#fff8f6;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:24px 18px 18px;text-align:center;background:#f7e9e5;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:clamp(27px,6vw,38px);letter-spacing:-1px}
+header p{margin:7px auto 0;max-width:500px;font-size:14px;line-height:1.45}
+main{max-width:850px;margin:0 auto;padding:16px;display:grid;gap:14px}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 4px 16px #7d43430b}
+h2{font-size:17px;margin:0 0 10px}
+p{line-height:1.45}
+.actions{display:flex;flex-wrap:wrap;gap:9px}
+button,.filebutton{font:inherit;font-weight:650;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.primary{background:var(--pink);color:white}
+.secondary{background:#f7e9e5;color:var(--ink)}
+.filebutton input{display:none}
+#stage{position:relative;width:100%;max-height:70vh;min-height:250px;background:#f3e6e3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
+#photo{display:block;width:100%;height:auto;max-height:70vh;object-fit:contain}
+#overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.empty{padding:35px 22px;text-align:center;color:#7b6265}
+.small{font-size:12px;color:#78656a}
+.styles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.style{background:#fff;border:1px solid var(--line);color:var(--ink);text-align:left;display:block;padding:12px}
+.style[aria-pressed="true"]{border:2px solid var(--pink);background:#fff4f3}
+.style strong{display:block;font-size:14px}
+.style span{font-size:12px;font-weight:400;color:#78656a}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}
+input[type=range]{width:100%;accent-color:var(--pink)}
+select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px;background:white;width:100%}
+.status{padding:10px 12px;background:#fff4f3;border-radius:12px;font-size:13px}
+footer{text-align:center;padding:0 20px 28px;font-size:12px;color:#78656a}
+@media(min-width:700px){main{grid-template-columns:1fr 1fr;align-items:start} .photo-panel{grid-row:span 3}.styles{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><div class="logo" aria-hidden="true">✿</div><div><h1>BrowGuide</h1><p>Perfect Brows · Simple Steps · Confident You</p></div></div>
-  <div class="pill">♥ &nbsp; Better brows. Brighter you.</div>
+<h1>♡ BrowGuide</h1>
+<p>Try eyebrow shapes on your own photo. Pick a style, then move the guide points to fit your brows.</p>
 </header>
 <main>
-  <section class="intro">
-    <h2>Find Your Brow Placement</h2>
-    <p>Learn where to start, where to create your arch, and where your brow can end.</p>
-    <p>Choose a marker below to explore each step. Every face is different — use these as flexible guidelines, not strict rules.</p>
-  </section>
-  <div class="layout">
-    <section class="panel face-panel" aria-label="Interactive eyebrow placement illustration">
-      <div class="illustration">
-        <svg class="face-svg" viewBox="0 0 500 520" role="img" aria-labelledby="faceTitle faceDesc">
-          <title id="faceTitle">Illustration showing eyebrow placement points</title>
-          <desc id="faceDesc">A simple face illustration with colored markers for brow start, arch, and end, plus guide lines from the nose.</desc>
-          <defs>
-            <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d1bd"/><stop offset="1" stop-color="#dca98e"/></linearGradient>
-            <linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b3029"/><stop offset="1" stop-color="#241a1a"/></linearGradient>
-          </defs>
-          <path d="M88 185 Q56 72 170 35 Q250 -4 330 35 Q444 72 412 185 L399 280 L101 280Z" fill="url(#hair)"/>
-          <path d="M105 160 Q100 80 170 60 Q250 20 330 60 Q400 80 395 160 L382 310 Q370 430 250 465 Q130 430 118 310Z" fill="url(#skin)" stroke="#cb9a82" stroke-width="2"/>
-          <path d="M115 211 Q155 176 203 206 Q165 227 123 220Z" fill="#57372e"/>
-          <path d="M297 206 Q345 176 385 211 L377 220 Q335 227 297 206Z" fill="#57372e"/>
-          <path d="M120 233 Q158 203 197 232 Q160 260 120 233Z" fill="#fff7ef" stroke="#b67e68" stroke-width="2"/>
-          <path d="M303 232 Q342 203 380 233 Q340 260 303 232Z" fill="#fff7ef" stroke="#b67e68" stroke-width="2"/>
-          <ellipse cx="160" cy="233" rx="15" ry="18" fill="#8b573d"/><ellipse cx="342" cy="233" rx="15" ry="18" fill="#8b573d"/>
-          <ellipse cx="160" cy="234" rx="7" ry="12" fill="#292321"/><ellipse cx="342" cy="234" rx="7" ry="12" fill="#292321"/>
-          <circle cx="155" cy="228" r="4" fill="white"/><circle cx="337" cy="228" r="4" fill="white"/>
-          <path d="M250 224 Q236 283 223 316 Q250 333 277 316" fill="none" stroke="#c58f77" stroke-width="5" stroke-linecap="round"/>
-          <path d="M216 366 Q250 380 284 366 Q250 400 216 366Z" fill="#b96d6b"/><path d="M220 366 Q250 356 280 366" fill="none" stroke="#9d5556" stroke-width="2"/>
-          <path d="M135 177 Q163 161 193 179" stroke="#6b4235" stroke-width="6" fill="none" stroke-linecap="round"/>
-          <path d="M307 179 Q337 161 365 177" stroke="#6b4235" stroke-width="6" fill="none" stroke-linecap="round"/>
-          <g class="guide-lines">
-            <path d="M127 177 L125 315"/><path d="M187 173 L250 313"/><path d="M199 177 L250 313"/>
-            <path d="M373 177 L375 315"/><path d="M313 173 L250 313"/><path d="M301 177 L250 313"/>
-          </g>
-          <path d="M125 177 Q160 158 195 177" fill="none" stroke="#e83e8c" stroke-width="3" stroke-linecap="round"/>
-          <path d="M305 177 Q340 158 375 177" fill="none" stroke="#e83e8c" stroke-width="3" stroke-linecap="round"/>
-          <g class="marker" tabindex="0" role="button" aria-label="Select Start marker" data-step="0">
-            <circle cx="125" cy="177" r="8" fill="#e83e8c" class="guide-dot"/><circle cx="375" cy="177" r="8" fill="#e83e8c" class="guide-dot"/>
-            <rect x="86" y="105" width="78" height="31" rx="15" fill="#e83e8c"/><text x="125" y="126" text-anchor="middle" class="guide-label">START</text>
-          </g>
-          <g class="marker" tabindex="0" role="button" aria-label="Select Arch marker" data-step="1">
-            <circle cx="185" cy="169" r="8" fill="#9550bd" class="guide-dot"/><circle cx="315" cy="169" r="8" fill="#9550bd" class="guide-dot"/>
-            <rect x="211" y="75" width="78" height="31" rx="15" fill="#9550bd"/><text x="250" y="96" text-anchor="middle" class="guide-label">ARCH</text>
-          </g>
-          <g class="marker" tabindex="0" role="button" aria-label="Select End marker" data-step="2">
-            <circle cx="195" cy="177" r="8" fill="#2687ed" class="guide-dot"/><circle cx="305" cy="177" r="8" fill="#2687ed" class="guide-dot"/>
-            <rect x="336" y="105" width="65" height="31" rx="15" fill="#2687ed"/><text x="368" y="126" text-anchor="middle" class="guide-label">END</text>
-          </g>
-        </svg>
-      </div>
-      <div class="marker-btns" aria-label="Choose a brow placement step">
-        <button class="marker-btn active" data-step="0">1 · Start</button>
-        <button class="marker-btn" data-step="1">2 · Arch</button>
-        <button class="marker-btn" data-step="2">3 · End</button>
-      </div>
-      <p class="note">Illustration is a learning guide, not a measurement tool. You can use a clean makeup brush or pencil as a straight edge.</p>
-    </section>
-    <section class="panel content">
-      <h3>Where to Place Your Brows</h3>
-      <div class="step"><div class="number">1</div><div><h4 class="pink">Start · Inner Corner</h4><p>Hold a makeup pencil vertically beside the outside of your nostril. Where it meets your brow area is a useful starting guide.</p></div></div>
-      <div class="step"><div class="number">2</div><div><h4 class="purple">Arch · Highest Point</h4><p>Angle the pencil from the side of your nose through the outer edge of your iris while looking straight ahead. This can help find a natural high point.</p></div></div>
-      <div class="step"><div class="number">3</div><div><h4 class="blue">End · Outer Corner</h4><p>Angle the pencil from the side of your nose toward the outer corner of your eye. The line gives you a guide for where the tail may finish.</p></div></div>
-      <div class="tip"><h4>✧ Quick Tips</h4><ul><li>Mark lightly with a brow pencil before filling in.</li><li>Compare both brows, but remember faces are naturally asymmetrical.</li><li>Use small, hair-like strokes for a softer look.</li><li>Step back and check your brows in natural light.</li></ul></div>
-      <div class="controls"><button id="prev" class="action secondary">← Previous</button><button id="next" class="action primary">Next step →</button><button id="reset" class="action secondary">Reset</button></div>
-      <p id="step-status" class="note" aria-live="polite">Step 1 of 3: Start · Inner Corner</p>
-    </section>
-  </div>
-  <section class="panel face-shapes">
-    <h3>Your Face Shape</h3><p>Optional — choose one for a few extra styling ideas.</p>
-    <div class="shape-list" role="group" aria-label="Choose your face shape">
-      <button class="shape selected" data-shape="oval">Oval</button><button class="shape" data-shape="round">Round</button><button class="shape" data-shape="square">Square</button><button class="shape" data-shape="heart">Heart</button><button class="shape" data-shape="long">Long</button><button class="shape" data-shape="unsure">Not sure</button>
-    </div>
-    <p id="shape-tip" class="shape-tip" aria-live="polite">Oval: Many brow shapes can work well. Follow your natural brow growth and adjust the arch to your preference.</p>
-  </section>
+<section class="panel photo-panel">
+<h2>1. Add your photo</h2>
+<div class="actions">
+<label class="filebutton primary">📷 Take a photo<input id="camera" type="file" accept="image/*" capture="user"></label>
+<label class="filebutton secondary">🖼️ Upload photo<input id="upload" type="file" accept="image/*"></label>
+<button class="secondary" id="reset">Reset points</button>
+</div>
+<p class="small">For the easiest fit, use a clear, front-facing photo with your forehead and both eyebrows visible.</p>
+<div id="stage" aria-label="Photo preview and eyebrow guide">
+<div class="empty" id="empty">Your photo will appear here.<br>Take a picture or choose one from your device.</div>
+<img id="photo" alt="Your selected face photo" hidden>
+<svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden aria-label="Eyebrow style overlay">
+<path id="leftBrow" fill="#65443f" fill-opacity=".72" stroke="#4a302d" stroke-width=".35" stroke-linejoin="round"/>
+<path id="rightBrow" fill="#65443f" fill-opacity=".72" stroke="#4a302d" stroke-width=".35" stroke-linejoin="round"/>
+<g id="handles"></g>
+</svg>
+</div>
+<div class="status" id="status" style="margin-top:10px">Choose a photo to begin. Your photo stays on this device; it is not uploaded by this page.</div>
+</section>
+<section class="panel">
+<h2>2. Choose a brow style</h2>
+<div class="styles" id="styles">
+<button class="style" data-style="natural" aria-pressed="true"><strong>Natural</strong><span>Soft, everyday shape</span></button>
+<button class="style" data-style="straight" aria-pressed="false"><strong>Straight</strong><span>Gentle, flatter arch</span></button>
+<button class="style" data-style="arched" aria-pressed="false"><strong>Defined arch</strong><span>More lifted peak</span></button>
+<button class="style" data-style="bold" aria-pressed="false"><strong>Full & bold</strong><span>Thicker, fuller brow</span></button>
+<button class="style" data-style="soft" aria-pressed="false"><strong>Soft rounded</strong><span>Rounded, gentle curve</span></button>
+<button class="style" data-style="thin" aria-pressed="false"><strong>Fine & subtle</strong><span>Light, slim brow</span></button>
+</div>
+</section>
+<section class="panel">
+<h2>3. Adjust the look</h2>
+<div class="controls">
+<div><label for="thickness">Brow thickness</label><input id="thickness" type="range" min="1" max="9" value="5"><div class="small">Slim ↔ full</div></div>
+<div><label for="darkness">Color intensity</label><input id="darkness" type="range" min="25" max="100" value="72"><div class="small">Soft ↔ bold</div></div>
+<div><label for="color">Brow color</label><select id="color"><option value="#65443f">Dark brown</option><option value="#8a5d4a">Warm brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option><option value="#7c6260">Taupe</option></select></div>
+<div><label for="side">Move which brow?</label><select id="side"><option value="both">Both brows</option><option value="left">Left side of photo</option><option value="right">Right side of photo</option></select></div>
+</div>
+<p class="small">Tip: drag the three guide dots for the selected brow. Move Start to the inner corner, Arch above the highest point, and End toward the outer corner. The labels are shown while adjusting.</p>
+</section>
+<section class="panel">
+<h2>4. Make it fit your face</h2>
+<p style="margin-top:0">The guide starts in a sample position. After adding your photo, drag the dots to line the brow shape up with your real eyebrows. This version overlays a style guide; it does not automatically recognize facial landmarks.</p>
+<div class="actions"><button class="primary" id="save">Save preview image</button><button class="secondary" id="clear">Remove photo</button></div>
+<p class="small">Save preview exports the photo with the brow overlay as an image.</p>
+</section>
 </main>
-<footer>BrowGuide ♥ Makeup made easier</footer>
+<footer>BrowGuide is a makeup planning aid. Check the shape in a mirror before grooming or removing hair.</footer>
 <script>
-(function(){
-  const names=[
-    {title:'Start · Inner Corner',text:'Step 1 of 3: Start · Inner Corner'},
-    {title:'Arch · Highest Point',text:'Step 2 of 3: Arch · Highest Point'},
-    {title:'End · Outer Corner',text:'Step 3 of 3: End · Outer Corner'}
-  ];
-  let step=0;
-  const buttons=[...document.querySelectorAll('.marker-btn')];
-  const markers=[...document.querySelectorAll('.marker')];
-  const status=document.getElementById('step-status');
-  function setStep(n){
-    step=(n+3)%3;
-    buttons.forEach(b=>b.classList.toggle('active',Number(b.dataset.step)===step));
-    markers.forEach(m=>m.style.opacity=Number(m.dataset.step)===step?'1':'.72');
-    status.textContent=names[step].text;
-    document.getElementById('prev').disabled=step===0;
-    document.getElementById('prev').style.opacity=step===0?'.55':'1';
-    document.getElementById('next').textContent=step===2?'Back to start ↻':'Next step →';
+(() => {
+const $ = id => document.getElementById(id);
+const photo=$('photo'), overlay=$('overlay'), empty=$('empty'), stage=$('stage'), status=$('status');
+let imageUrl=null, active='natural', dragging=null;
+const state={
+ left:{start:[30,42],arch:[39,38],end:[47,42]},
+ right:{start:[53,42],arch:[62,38],end:[70,42]}
+};
+const presets={
+ natural:{arch:0,width:1.0,curve:1.0},
+ straight:{arch:2,width:.95,curve:.55},
+ arched:{arch:-4,width:1.0,curve:1.25},
+ bold:{arch:-1,width:1.55,curve:1.05},
+ soft:{arch:-1,width:1.05,curve:1.45},
+ thin:{arch:0,width:.52,curve:.9}
+};
+function isReady(){return !photo.hidden}
+function getViewSize(){return {w:100,h:100}}
+function pathFor(points, side){
+ const preset=presets[active], thick=Number($('thickness').value)*.34*preset.width;
+ const [sx,sy]=points.start,[ax,ay]=points.arch,[ex,ey]=points.end;
+ const archY=ay+preset.arch;
+ const dx1=ax-sx, dx2=ex-ax;
+ const upper=`M ${sx} ${sy} Q ${sx+dx1*.55} ${sy-1.8*preset.curve} ${ax} ${archY} Q ${ax+dx2*.45} ${archY-1.5*preset.curve} ${ex} ${ey}`;
+ const lower=`L ${ex} ${ey+thick*.55} Q ${ax+dx2*.4} ${archY+thick*.95} ${ax} ${archY+thick} Q ${sx+dx1*.5} ${sy+thick*.8} ${sx} ${sy+thick*.55} Z`;
+ return upper+' '+lower;
+}
+function render(){
+ if(!isReady())return;
+ for(const side of ['left','right']){
+  $(side+'Brow').setAttribute('d',pathFor(state[side],side));
+  $(side+'Brow').setAttribute('fill',$('color').value);
+  $(side+'Brow').setAttribute('fill-opacity',Number($('darkness').value)/100);
+  $(side+'Brow').setAttribute('stroke',$('color').value);
+  $(side+'Brow').setAttribute('stroke-width',String(Number($('thickness').value)*.045));
+ }
+ const group=$('handles');group.innerHTML='';
+ const which=$('side').value;
+ for(const side of ['left','right']){
+  if(which!=='both'&&which!==side)continue;
+  for(const key of ['start','arch','end']){
+   const [x,y]=state[side][key];
+   const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+   c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r','1.35');
+   c.setAttribute('fill','#fff');c.setAttribute('stroke','#b96d78');c.setAttribute('stroke-width','.55');
+   c.dataset.side=side;c.dataset.point=key;c.style.cursor='grab';group.appendChild(c);
+   const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+   t.setAttribute('x',x);t.setAttribute('y',y-2);t.setAttribute('font-size','2.6');t.setAttribute('text-anchor','middle');t.setAttribute('fill','#fff');t.setAttribute('stroke','#4b2c32');t.setAttribute('stroke-width','.18');t.setAttribute('paint-order','stroke');t.textContent=key==='start'?'Start':key==='arch'?'Arch':'End';group.appendChild(t);
   }
-  buttons.forEach(b=>b.addEventListener('click',()=>setStep(Number(b.dataset.step))));
-  markers.forEach(m=>{
-    m.addEventListener('click',()=>setStep(Number(m.dataset.step)));
-    m.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setStep(Number(m.dataset.step));}});
-  });
-  document.getElementById('prev').addEventListener('click',()=>setStep(step-1));
-  document.getElementById('next').addEventListener('click',()=>setStep(step+1));
-  document.getElementById('reset').addEventListener('click',()=>{setStep(0);document.querySelectorAll('.shape').forEach(b=>b.classList.toggle('selected',b.dataset.shape==='oval'));document.getElementById('shape-tip').textContent=tips.oval;});
-  const tips={
-    oval:'Oval: Many brow shapes can work well. Follow your natural brow growth and adjust the arch to your preference.',
-    round:'Round: A softly defined arch may add a little structure. Keep the shape comfortable and natural for your features.',
-    square:'Square: A softly curved or gently angled brow may balance stronger angles. Avoid forcing a shape that feels unlike you.',
-    heart:'Heart: A softer, natural arch can complement your features. Keep the tail balanced with the rest of the brow.',
-    long:'Long: A flatter, gently shaped brow may create a balanced look. Keep the tail aligned with your own eye shape.',
-    unsure:'Not sure? No problem. Start by following your natural brow growth, then test small changes with pencil before committing.'
-  };
-  document.querySelectorAll('.shape').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.shape').forEach(x=>x.classList.toggle('selected',x===b));
-    document.getElementById('shape-tip').textContent=tips[b.dataset.shape];
-  }));
-  setStep(0);
+ }
+}
+function loadFile(file){
+ if(!file)return;
+ if(!file.type.startsWith('image/')){status.textContent='Please choose an image file.';return}
+ if(imageUrl)URL.revokeObjectURL(imageUrl);
+ imageUrl=URL.createObjectURL(file);
+ photo.onload=()=>{
+  photo.hidden=false;empty.hidden=true;overlay.hidden=false;
+  const rect=stage.getBoundingClientRect();
+  overlay.setAttribute('viewBox','0 0 100 100');
+  status.textContent='Photo ready. Choose a style, then drag the Start, Arch, and End dots to line up each brow.';
+  render();
+ };
+ photo.onerror=()=>{status.textContent='That photo could not be opened. Please try another image.'};
+ photo.src=imageUrl;
+}
+$('camera').addEventListener('change',e=>loadFile(e.target.files[0]));
+$('upload').addEventListener('change',e=>loadFile(e.target.files[0]));
+document.querySelectorAll('[data-style]').forEach(btn=>btn.addEventListener('click',()=>{
+ active=btn.dataset.style;
+ document.querySelectorAll('[data-style]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+ render();
+}));
+['thickness','darkness','color','side'].forEach(id=>$(id).addEventListener('input',render));
+function pointFromEvent(e){
+ const r=overlay.getBoundingClientRect();
+ return [Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)),Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100))];
+}
+overlay.addEventListener('pointerdown',e=>{
+ const target=e.target;
+ if(target.tagName.toLowerCase()!=='circle')return;
+ dragging={side:target.dataset.side,point:target.dataset.point};
+ overlay.setPointerCapture(e.pointerId);e.preventDefault();
+});
+overlay.addEventListener('pointermove',e=>{
+ if(!dragging)return;
+ const [x,y]=pointFromEvent(e);
+ state[dragging.side][dragging.point]=[x,y];
+ render();
+});
+overlay.addEventListener('pointerup',()=>dragging=null);
+overlay.addEventListener('pointercancel',()=>dragging=null);
+$('reset').addEventListener('click',()=>{
+ state.left={start:[30,42],arch:[39,38],end:[47,42]};
+ state.right={start:[53,42],arch:[62,38],end:[70,42]};
+ render();status.textContent='Guide points reset to the sample position. Drag them to fit your photo.';
+});
+$('clear').addEventListener('click',()=>{
+ if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=null;photo.removeAttribute('src');photo.hidden=true;overlay.hidden=true;empty.hidden=false;
+ $('camera').value='';$('upload').value='';status.textContent='Choose a photo to begin. Your photo stays on this device.';
+});
+$('save').addEventListener('click',()=>{
+ if(!isReady()){status.textContent='Add a photo first, then save your preview.';return}
+ const w=photo.naturalWidth,h=photo.naturalHeight;
+ const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+ const ctx=canvas.getContext('2d');ctx.drawImage(photo,0,0,w,h);
+ // Overlay uses a 0–100 coordinate system covering the image display box.
+ const left=stage.getBoundingClientRect(), pr=photo.getBoundingClientRect();
+ const scaleX=w/pr.width, scaleY=h/pr.height;
+ ctx.save();ctx.scale(w/100,h/100);
+ for(const side of ['left','right']){
+  const p=state[side],preset=presets[active],thick=Number($('thickness').value)*.34*preset.width;
+  const [sx,sy]=p.start,[ax,ay]=p.arch,[ex,ey]=p.end,dx1=ax-sx,dx2=ex-ax,archY=ay+preset.arch;
+  ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo(sx+dx1*.55,sy-1.8*preset.curve,ax,archY);ctx.quadraticCurveTo(ax+dx2*.45,archY-1.5*preset.curve,ex,ey);ctx.lineTo(ex,ey+thick*.55);ctx.quadraticCurveTo(ax+dx2*.4,archY+thick*.95,ax,archY+thick);ctx.quadraticCurveTo(sx+dx1*.5,sy+thick*.8,sx,sy+thick*.55);ctx.closePath();
+  ctx.globalAlpha=Number($('darkness').value)/100;ctx.fillStyle=$('color').value;ctx.fill();ctx.globalAlpha=1;
+ }
+ ctx.restore();
+ canvas.toBlob(blob=>{
+  if(!blob){status.textContent='Could not create the preview. Try again.';return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BrowGuide-preview.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  status.textContent='Preview saved. Check your device’s Downloads or Photos.';
+ },'image/png');
+});
 })();
 </script>
 </body>
