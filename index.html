@@ -96,8 +96,8 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 <div><label for="style">Brow shape</label><select id="style"><option value="natural">Natural soft arch</option><option value="straight">Straighter brow</option><option value="arched">More defined arch</option><option value="rounded">Soft rounded arch</option></select></div>
 <div><label for="color">Brow colour</label><select id="color"><option value="#8b514c">Rose brown</option><option value="#65443f">Dark brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option></select></div>
 </div>
-<label style="display:flex;align-items:center;gap:8px;margin:12px 0"><input id="eraseBrows" type="checkbox" checked style="width:18px;height:18px"> Approximate cover of natural brows</label>
-<p class="small">The cover is a soft sampled-colour stroke, not true skin reconstruction or a perfect eyebrow eraser. The suggested brow is a visual mock-up.</p>
+<label style="display:flex;align-items:center;gap:8px;margin:12px 0"><input id="eraseBrows" type="checkbox" checked style="width:18px;height:18px"> Soft cover on suggested edit zone</label>
+<p class="small">The cover only softens the small suggested edit zone; it does not erase the whole eyebrow or reconstruct skin. The suggested brow is a visual mock-up.</p>
 <div class="actions"><button class="primary" id="showDiagram" disabled>Show brow guide in app</button><button class="secondary" id="clear">Remove photo</button></div>
 </section>
 </main>
@@ -159,28 +159,37 @@ function render(){
   const centerY=pts.reduce((sum,p)=>sum+p.y,0)/pts.length;
   const adjusted=pts.map((p,i)=>({x:p.x,y:p.y+(i===2?lift*r.height/100:0)}));
   const thickness=Math.max(5,r.width*.009);
-  const upper=adjusted.map(p=>({x:p.x,y:p.y-thickness*.45}));
-  const lower=adjusted.map(p=>({x:p.x,y:p.y+thickness*.65}));
+  const upper=adjusted.map(p=>({x:p.x,y:p.y-thickness*.8}));
+  const lower=adjusted.map(p=>({x:p.x,y:p.y+thickness*.9}));
   if($('showFill').checked){
-   ctx.beginPath();upper.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-   lower.slice().reverse().forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();
-   ctx.fillStyle='rgba(217,107,154,.48)';ctx.fill();
+   // Highlight only a short central section as a possible fill zone, not the full brow.
+   // Landmark geometry cannot reliably tell which individual hairs are missing.
+   const a=adjusted[1], b=adjusted[3];
+   const patchTop=[{x:a.x,y:a.y-thickness*.35}, {x:(a.x+b.x)/2,y:centerY-thickness*.62}, {x:b.x,y:b.y-thickness*.35}];
+   const patchBottom=patchTop.map(p=>({x:p.x,y:p.y+thickness*.95}));
+   ctx.beginPath();patchTop.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+   patchBottom.slice().reverse().forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();
+   ctx.fillStyle='rgba(217,107,154,.34)';ctx.fill();
   }
   if($('showTidy').checked){
-   ctx.save();ctx.strokeStyle='#e8ad48';ctx.lineWidth=2.5;ctx.setLineDash([6,4]);
+   ctx.save();ctx.strokeStyle='#e8ad48';ctx.lineWidth=1.5;ctx.setLineDash([4,5]);
    [upper,lower].forEach(line=>{ctx.beginPath();line.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();});ctx.restore();
   }
   if($('showSparse').checked){
+   // A compact group of dots marks a small optional pencil-fill area.
    ctx.fillStyle='#168f83';
-   [.25,.38,.5,.62,.75].forEach(t=>{const x=adjusted[0].x+(adjusted[4].x-adjusted[0].x)*t;ctx.beginPath();ctx.arc(x,centerY,3.2,0,Math.PI*2);ctx.fill();});
+   [.43,.50,.57].forEach((t,i)=>{const x=adjusted[0].x+(adjusted[4].x-adjusted[0].x)*t;const y=centerY+(i===1?1.5:-1.2);ctx.beginPath();ctx.arc(x,y,2.6,0,Math.PI*2);ctx.fill();});
   }
   if($('showTrim').checked){
    ctx.save();ctx.strokeStyle='#8c83c9';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();
    adjusted.forEach((p,i)=>i?ctx.lineTo(p.x,p.y-thickness*1.25):ctx.moveTo(p.x,p.y-thickness*1.25));ctx.stroke();ctx.restore();
   }
-  if($('eraseBrows').checked){
-   ctx.save();ctx.strokeStyle='rgba(232,201,185,.78)';ctx.lineWidth=thickness*1.25;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
-   adjusted.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.restore();
+  if($('eraseBrows').checked && $('showFill').checked){
+   // A subtle local swatch under the suggested edit zone; this is only a mock-up,
+   // not true removal or reconstruction of eyebrow hair.
+   const a=adjusted[1], b=adjusted[3];
+   ctx.save();ctx.strokeStyle='rgba(232,201,185,.36)';ctx.lineWidth=thickness*.75;ctx.lineCap='round';
+   ctx.beginPath();ctx.moveTo(a.x,a.y+thickness*.25);ctx.lineTo((a.x+b.x)/2,centerY+thickness*.35);ctx.lineTo(b.x,b.y+thickness*.25);ctx.stroke();ctx.restore();
   }
   drawn++;
  }
@@ -196,7 +205,7 @@ async function analyze(){
   const model=await loadDetector(),result=model.detect(photo);
   if(!result.faceLandmarks?.length){landmarks=null;overlay.hidden=true;status.textContent='No face found. Try a straight-on photo with better lighting and both brows visible.';$('recommendation').textContent='No face was detected. Try another photo.';return;}
   landmarks=result.faceLandmarks[0];render();
-  $('recommendation').textContent='A natural soft arch is a gentle starting point. Pink marks a suggested fill area, gold marks the brow edges as a tidy-up reference, teal dots mark a possible area for extra pencil strokes, and purple marks an upper trim-check boundary. These are broad visual estimates, not hair-by-hair instructions.';
+  $('recommendation').textContent='A natural soft arch is a gentle starting point. Pink marks a small suggested fill zone, gold shows subtle edge references, teal dots mark a compact optional pencil-fill area, and purple marks an upper trim-check reference. These are broad visual estimates, not hair-by-hair instructions.';
   status.textContent=didDraw?'Face landmarks detected. Colour guides are drawn over both brow areas.':'Face detected, but the guide could not be positioned. Try a brighter, straight-on photo.';
  }catch(e){console.error(e);status.textContent='The face model did not load. Check your internet connection and reload the page. If it continues, the model service may be unavailable.';}
  finally{$('analyze').disabled=false;}
