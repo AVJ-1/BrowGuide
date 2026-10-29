@@ -37,7 +37,7 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 <body>
 <header>
 <h1>♡ BrowGuide</h1>
-<p>Use your live camera and BrowGuide will detect your brow area, recommend a shape, and draw a guide on a captured frame.</p>
+<p>Use your live camera and BrowGuide will detect your brow area, recommend a shape, and show an in-app brow diagram on a captured frame without downloading it to your device.</p>
 </header>
 <main>
 <section class="panel photo-panel">
@@ -64,13 +64,14 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 <p id="recommendation">Your recommended brow shape will appear here after detection.</p>
 </section>
 <section class="panel">
-<h2>3. Personalize the diagram</h2>
+<h2>3. Erase natural brows & preview a new shape</h2>
 <div class="controls">
 <div><label for="style">Brow shape</label><select id="style"><option value="auto">Best match (recommended)</option><option value="natural">Natural soft arch</option><option value="straight">Straighter brow</option><option value="arched">More defined arch</option><option value="rounded">Soft rounded arch</option></select></div>
 <div><label for="color">Guide color</label><select id="color"><option value="#8b514c">Rose brown</option><option value="#65443f">Dark brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option></select></div>
 </div>
-<p class="small">The diagram uses detected facial landmarks to estimate brow placement. It is a cosmetic guide, not a professional measurement.</p>
-<div class="actions"><button class="primary" id="save" disabled>Save diagram</button><button class="secondary" id="clear">Remove photo</button></div>
+<p class="small">Turn on “Cover natural brows” to mask your existing brows with a sampled skin-tone patch, then preview a suggested brow shape. This is a visual mock-up, not true AI photo retouching, so the covered area may look smooth or imperfect.</p>
+<label style="display:flex;align-items:center;gap:8px;margin:12px 0"><input id="eraseBrows" type="checkbox" checked style="width:18px;height:18px"> Cover natural eyebrows in the preview</label>
+<div class="actions"><button class="primary" id="showDiagram" disabled>Show brow diagram in app</button><button class="secondary" id="clear">Remove photo</button></div>
 </section>
 </main>
 <footer>For best results, check the guide in a mirror before grooming. Face shape alone cannot determine personal style or preference.</footer>
@@ -139,7 +140,7 @@ function captureFrame(){
   imageUrl=URL.createObjectURL(blob);detected=null;
   photo.onload=()=>{
    photo.hidden=false;overlay.hidden=true;$('liveVideo').hidden=true;
-   $('analyze').disabled=false;$('save').disabled=true;
+   $('analyze').disabled=false;$('showDiagram').disabled=true;
    $('recommendation').textContent='Captured frame ready. Tap “Detect my brows” to analyze it.';
    status.textContent='Frame captured. Tap “Detect my brows” to draw the guide. Start the camera again to capture another frame.';
   };
@@ -169,6 +170,17 @@ function curvePath(pts, style, color){
  const lower=top.slice().reverse().map((a,i)=>`L ${a.x.toFixed(2)} ${(a.y+width).toFixed(2)}`).join(' ');
  return `${upper} ${lower} Z`;
 }
+function sampleSkinColor(xPct,yPct){
+ // Sample a small patch just above the brow from the actual image for a closer skin-tone match.
+ try{
+  const c=document.createElement('canvas');c.width=photo.naturalWidth;c.height=photo.naturalHeight;
+  const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(photo,0,0);
+  const x=Math.max(0,Math.min(c.width-1,Math.round(xPct/100*c.width)));
+  const y=Math.max(0,Math.min(c.height-1,Math.round(yPct/100*c.height)));
+  const data=cx.getImageData(x,y,1,1).data;
+  return `rgb(${data[0]},${data[1]},${data[2]})`;
+ }catch(e){return '#d9b7a8'}
+}
 function draw(){
  if(!detected)return;
  const landmarks=detected;
@@ -181,6 +193,23 @@ function draw(){
  const chosen=styles[style];
  const leftPath=curvePath(left,style,selectedColor), rightPath=curvePath(right,style,selectedColor);
  overlay.innerHTML='';
+ // Mask the natural brow area first. This uses a sampled skin color and a soft-edged SVG stroke.
+ // It approximates concealing makeup; it cannot reconstruct the original skin texture.
+ if($('eraseBrows').checked){
+  for(const arr of [left,right]){
+   if(arr.length<3)continue;
+   const center=arr[Math.floor(arr.length/2)];
+   const skin=sampleSkinColor(center.x,Math.max(1,center.y-2.4));
+   const d=arr.map((pt,i)=>`${i===0?'M':'L'} ${pt.x.toFixed(2)} ${(pt.y-0.15).toFixed(2)}`).join(' ');
+   const mask=document.createElementNS('http://www.w3.org/2000/svg','path');
+   mask.setAttribute('d',d);mask.setAttribute('fill','none');mask.setAttribute('stroke',skin);
+   mask.setAttribute('stroke-width','3.7');mask.setAttribute('stroke-linecap','round');mask.setAttribute('stroke-linejoin','round');
+   mask.setAttribute('filter','url(#skinSoft)');overlay.appendChild(mask);
+  }
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML='<filter id="skinSoft"><feGaussianBlur stdDeviation="0.65"/></filter>';
+  overlay.insertBefore(defs,overlay.firstChild);
+ }
  for(const [d,side] of [[leftPath,'left'],[rightPath,'right']]){
   const path=document.createElementNS('http://www.w3.org/2000/svg','path');
   path.setAttribute('d',d);path.setAttribute('fill',selectedColor);path.setAttribute('fill-opacity','.82');
@@ -199,7 +228,7 @@ function draw(){
   }
  }
  overlay.hidden=false;
- $('save').disabled=false;
+ $('showDiagram').disabled=false;
 }
 async function analyze(){
  if(!photo.src||photo.hidden)return;
@@ -221,7 +250,7 @@ async function analyze(){
   if(width>eyeDist*1.25)suggestion='Natural soft arch';
   selectedStyle='auto';$('style').value='auto';
   draw();
-  $('recommendation').textContent=`Recommended starting point: ${suggestion}. The detected landmarks suggest using your natural brow line and a gentle arch. The diagram marks estimated Start, Arch, and End points on both brows. You can switch the guide shape below if you prefer a different look.`;
+  $('recommendation').textContent=`Suggested starting point: ${suggestion}. Based on the detected eye and brow placement, a soft natural arch is a conservative first option—not a guaranteed personal-style judgment. Turn on “Cover natural eyebrows” to mask the original brows, then choose Straighter brow, Defined arch, or Soft rounded arch to compare. The mask is an approximation and may not erase every hair perfectly.`;
   status.textContent='Face detected. Brow guide drawn on your photo. If the overlay is not perfectly aligned, use a clearer, straight-on photo.';
  }catch(err){
   console.error(err);
@@ -231,7 +260,7 @@ async function analyze(){
 $('fileInput').addEventListener('change',event=>{
  const file=event.target.files&&event.target.files[0];if(!file)return;
  stopCamera();if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(file);detected=null;
- photo.onload=()=>{photo.hidden=false;overlay.hidden=true;empty.hidden=true;$('liveVideo').hidden=true;$('analyze').disabled=false;$('save').disabled=true;$('recommendation').textContent='Photo ready. Tap “Detect my brows” to analyze it.';status.textContent='Photo loaded. Tap “Detect my brows” to draw your brow guide.'};
+ photo.onload=()=>{photo.hidden=false;overlay.hidden=true;empty.hidden=true;$('liveVideo').hidden=true;$('analyze').disabled=false;$('showDiagram').disabled=true;$('recommendation').textContent='Photo ready. Tap “Detect my brows” to analyze it.';status.textContent='Photo loaded. Tap “Detect my brows” to draw your brow guide.'};
  photo.src=imageUrl;
 });
 $('startCamera').addEventListener('click',startCamera);
@@ -240,33 +269,21 @@ $('capture').addEventListener('click',captureFrame);
 $('stopCamera').addEventListener('click',()=>{stopCamera();status.textContent='Camera stopped.'});
 $('analyze').addEventListener('click',analyze);
 $('style').addEventListener('change',()=>{selectedStyle=$('style').value;if(detected)draw()});
+$('eraseBrows').addEventListener('change',()=>{if(detected)draw()});
 $('color').addEventListener('change',()=>{selectedColor=$('color').value;if(detected)draw()});
 $('clear').addEventListener('click',()=>{
  stopCamera();
  if(imageUrl)URL.revokeObjectURL(imageUrl);
  imageUrl=null;detected=null;photo.removeAttribute('src');photo.hidden=true;overlay.hidden=true;overlay.innerHTML='';empty.hidden=false;
- $('analyze').disabled=true;$('save').disabled=true;
+ $('analyze').disabled=true;$('showDiagram').disabled=true;
  $('status').textContent='Tap Start live camera to begin.';$('recommendation').textContent='Your recommended brow shape will appear here after detection.';
 });
-$('save').addEventListener('click',()=>{
- if(!detected||photo.hidden)return;
- const w=photo.naturalWidth,h=photo.naturalHeight,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
- const ctx=canvas.getContext('2d');ctx.drawImage(photo,0,0,w,h);
- const stageRect=$('stage').getBoundingClientRect(),photoRect=photo.getBoundingClientRect();
- const scaleX=stageRect.width/100,scaleY=stageRect.height/100;
- for(const path of overlay.querySelectorAll('path')){
-  // SVG path geometry is scaled from stage coordinates into original photo pixels.
-  const svgPath=new Path2D(path.getAttribute('d'));
-  ctx.save();ctx.translate(-(photoRect.left-stageRect.left)/stageRect.width*100,-(photoRect.top-stageRect.top)/stageRect.height*100);
-  ctx.scale(w/photoRect.width*stageRect.width/100,h/photoRect.height*stageRect.height/100);
-  ctx.fillStyle=selectedColor;ctx.globalAlpha=.82;ctx.fill(svgPath);ctx.restore();
- }
- // Draw the placement dots as a simple visible reference on the saved image.
- canvas.toBlob(blob=>{
-  if(!blob){status.textContent='Could not save the image. Please try again.';return}
-  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BrowGuide-recommended-diagram.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);
-  status.textContent='Your brow diagram has been saved to your device.';
- },'image/png');
+$('showDiagram').addEventListener('click',()=>{
+ if(!detected||photo.hidden){status.textContent='Capture a frame or choose a photo, then tap Detect my brows first.';return;}
+ draw();
+ overlay.hidden=false;
+ $('stage').scrollIntoView({behavior:'smooth',block:'center'});
+ status.textContent='Your brow diagram is displayed above in BrowGuide. It has not been downloaded or saved as an image.';
 });
 </script>
 </body>
