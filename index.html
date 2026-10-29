@@ -37,11 +37,11 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 <body>
 <header>
 <h1>♡ BrowGuide</h1>
-<p>Use your live camera and BrowGuide will detect your brow area, recommend a shape, and show an in-app brow diagram on a captured frame without downloading it to your device.</p>
+<p>Use the live camera as a mirror. Capture a frame and BrowGuide will outline a suggested area to fill in your eyebrows, right inside the app.</p>
 </header>
 <main>
 <section class="panel photo-panel">
-<h2>1. Use your live camera or choose a photo</h2>
+<h2>1. Use your live mirror camera or choose a photo</h2>
 <div class="actions">
 <label class="filebutton secondary">Choose a photo<input type="file" id="fileInput" accept="image/*" hidden></label>
 <button class="primary" id="startCamera">📷 Start live camera</button>
@@ -50,14 +50,14 @@ footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 <button class="secondary" id="stopCamera" disabled>Stop camera</button>
 <button class="primary" id="analyze" disabled>Detect my brows</button>
 </div>
-<p class="small">Allow camera access when your browser asks. Face the camera in even lighting and keep your forehead and both eyebrows visible. Your camera frames are processed in your browser.</p>
+<p class="small">The live front-camera preview is mirrored like a regular mirror. For the fill-in outline, capture a frame and tap Detect my brows. Keep both brows visible in even lighting. Frames are processed in your browser.</p>
 <div id="stage">
-<div class="empty" id="empty">Tap “Start live camera” or choose a photo to begin.</div>
-<video id="liveVideo" autoplay playsinline muted hidden style="display:block;width:100%;height:auto;max-height:70vh;object-fit:contain"></video>
+<div class="empty" id="empty">Tap “Start live camera” to use the mirror, or choose a photo.</div>
+<video id="liveVideo" autoplay playsinline muted hidden style="display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;transform:scaleX(-1)"></video>
 <img id="photo" alt="Captured face frame" hidden>
 <svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden></svg>
 </div>
-<div class="status" id="status">Start the live camera and capture a frame, or choose a photo. Then tap “Detect my brows.”</div>
+<div class="status" id="status">Start the live mirror camera, capture a frame, then tap “Detect my brows” to see the fill-in outline.</div>
 </section>
 <section class="panel">
 <h2>2. Your recommendation</h2>
@@ -111,7 +111,7 @@ async function startCamera(){
   const video=$('liveVideo');video.srcObject=cameraStream;video.hidden=false;photo.hidden=true;overlay.hidden=true;empty.hidden=true;
   await video.play();
   $('startCamera').disabled=true;$('switchCamera').disabled=false;$('capture').disabled=false;$('stopCamera').disabled=false;
-  $('status').textContent='Live camera is on. Center your face, then tap “Use this frame” to analyze and draw the brow guide.';
+  $('status').textContent='Mirror camera is on. Center your face; capture a frame and tap “Detect my brows” to show the fill-in outlines.';
  }catch(err){
   status.textContent=err.name==='NotAllowedError'
    ?'Camera permission was denied. Allow camera access in your browser settings, then tap Start live camera again.'
@@ -212,8 +212,8 @@ function draw(){
  }
  for(const [d,side] of [[leftPath,'left'],[rightPath,'right']]){
   const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-  path.setAttribute('d',d);path.setAttribute('fill',selectedColor);path.setAttribute('fill-opacity','.82');
-  path.setAttribute('stroke',selectedColor);path.setAttribute('stroke-width','.18');path.setAttribute('stroke-linejoin','round');
+  path.setAttribute('d',d);path.setAttribute('fill',selectedColor);path.setAttribute('fill-opacity','.16');
+  path.setAttribute('stroke',selectedColor);path.setAttribute('stroke-width','.42');path.setAttribute('stroke-linejoin','round');path.setAttribute('stroke-dasharray','1.1 0.65');
   overlay.appendChild(path);
  }
  // Add small placement marks and labels near the ends and arch of each detected brow.
@@ -250,8 +250,8 @@ async function analyze(){
   if(width>eyeDist*1.25)suggestion='Natural soft arch';
   selectedStyle='auto';$('style').value='auto';
   draw();
-  $('recommendation').textContent=`Suggested starting point: ${suggestion}. Based on the detected eye and brow placement, a soft natural arch is a conservative first option—not a guaranteed personal-style judgment. Turn on “Cover natural eyebrows” to mask the original brows, then choose Straighter brow, Defined arch, or Soft rounded arch to compare. The mask is an approximation and may not erase every hair perfectly.`;
-  status.textContent='Face detected. Brow guide drawn on your photo. If the overlay is not perfectly aligned, use a clearer, straight-on photo.';
+  $('recommendation').textContent=`Suggested starting point: ${suggestion}. The tinted, dashed outline marks a suggested area to fill with brow pencil or powder. This is a guide, not a guaranteed personal-style judgment. Choose Straighter brow, Defined arch, or Soft rounded arch to compare.`;
+  status.textContent='Face detected. Dashed outlines show the suggested brow fill area on your captured mirror frame. If they do not line up, face the camera straight on in even lighting and try again.';
  }catch(err){
   console.error(err);
   status.textContent='The face-detection model could not load. Check your internet connection, then try Detect my brows again.';
@@ -283,7 +283,7 @@ $('showDiagram').addEventListener('click',()=>{
  draw();
  overlay.hidden=false;
  $('stage').scrollIntoView({behavior:'smooth',block:'center'});
- status.textContent='Your brow diagram is displayed above in BrowGuide. It has not been downloaded or saved as an image.';
+ status.textContent='Your brow fill-in outline is displayed in BrowGuide. It has not been downloaded or saved as an image.';
 });
 </script>
 </body>
