@@ -4,221 +4,270 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f7e9e5">
-<title>BrowGuide — Try a brow style</title>
+<title>BrowGuide — Find your brow shape</title>
 <style>
 :root{--pink:#b96d78;--ink:#34262a;--soft:#fff8f6;--line:#ead2d1}
 *{box-sizing:border-box}
-body{margin:0;background:#fff8f6;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-header{padding:24px 18px 18px;text-align:center;background:#f7e9e5;border-bottom:1px solid var(--line)}
-h1{margin:0;font-size:clamp(27px,6vw,38px);letter-spacing:-1px}
-header p{margin:7px auto 0;max-width:500px;font-size:14px;line-height:1.45}
-main{max-width:850px;margin:0 auto;padding:16px;display:grid;gap:14px}
-.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 4px 16px #7d43430b}
+body{margin:0;background:var(--soft);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:23px 18px 18px;text-align:center;background:#f7e9e5;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:clamp(28px,6vw,38px);letter-spacing:-1px}
+header p{margin:7px auto 0;max-width:560px;font-size:14px;line-height:1.45}
+main{max-width:900px;margin:0 auto;padding:15px;display:grid;gap:13px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 4px 16px #7d43430b}
 h2{font-size:17px;margin:0 0 10px}
-p{line-height:1.45}
 .actions{display:flex;flex-wrap:wrap;gap:9px}
 button,.filebutton{font:inherit;font-weight:650;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
-.primary{background:var(--pink);color:white}
-.secondary{background:#f7e9e5;color:var(--ink)}
+.primary{background:var(--pink);color:white}.secondary,.filebutton.secondary{background:#f7e9e5;color:var(--ink)}
 .filebutton input{display:none}
-#stage{position:relative;width:100%;max-height:70vh;min-height:250px;background:#f3e6e3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
+#stage{position:relative;width:100%;min-height:240px;max-height:70vh;background:#f3e6e3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}
 #photo{display:block;width:100%;height:auto;max-height:70vh;object-fit:contain}
-#overlay{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+[hidden]{display:none!important}
+#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .empty{padding:35px 22px;text-align:center;color:#7b6265}
-.small{font-size:12px;color:#78656a}
-.styles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.style{background:#fff;border:1px solid var(--line);color:var(--ink);text-align:left;display:block;padding:12px}
-.style[aria-pressed="true"]{border:2px solid var(--pink);background:#fff4f3}
-.style strong{display:block;font-size:14px}
-.style span{font-size:12px;font-weight:400;color:#78656a}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}
-input[type=range]{width:100%;accent-color:var(--pink)}
+.small{font-size:12px;color:#78656a;line-height:1.5}
+.status{padding:10px 12px;background:#fff4f3;border-radius:12px;font-size:13px;line-height:1.45;margin-top:10px}
+#recommendation{font-size:14px;line-height:1.55;margin:0}
 select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px;background:white;width:100%}
-.status{padding:10px 12px;background:#fff4f3;border-radius:12px;font-size:13px}
-footer{text-align:center;padding:0 20px 28px;font-size:12px;color:#78656a}
-@media(min-width:700px){main{grid-template-columns:1fr 1fr;align-items:start} .photo-panel{grid-row:span 3}.styles{grid-template-columns:1fr 1fr}}
+label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media(min-width:720px){main{grid-template-columns:1.1fr .9fr;align-items:start}.photo-panel{grid-row:span 3}}
+footer{text-align:center;padding:0 20px 26px;font-size:12px;color:#78656a}
 </style>
 </head>
 <body>
 <header>
 <h1>♡ BrowGuide</h1>
-<p>Try eyebrow shapes on your own photo. Pick a style, then move the guide points to fit your brows.</p>
+<p>Use your live camera and BrowGuide will detect your brow area, recommend a shape, and draw a guide on a captured frame.</p>
 </header>
 <main>
 <section class="panel photo-panel">
-<h2>1. Add your photo</h2>
+<h2>1. Use your live camera or choose a photo</h2>
 <div class="actions">
-<label class="filebutton primary">📷 Take a photo<input id="camera" type="file" accept="image/*" capture="user"></label>
-<label class="filebutton secondary">🖼️ Upload photo<input id="upload" type="file" accept="image/*"></label>
-<button class="secondary" id="reset">Reset points</button>
+<label class="filebutton secondary">Choose a photo<input type="file" id="fileInput" accept="image/*" hidden></label>
+<button class="primary" id="startCamera">📷 Start live camera</button>
+<button class="secondary" id="switchCamera" disabled>↻ Switch camera</button>
+<button class="secondary" id="capture" disabled>Use this frame</button>
+<button class="secondary" id="stopCamera" disabled>Stop camera</button>
+<button class="primary" id="analyze" disabled>Detect my brows</button>
 </div>
-<p class="small">For the easiest fit, use a clear, front-facing photo with your forehead and both eyebrows visible.</p>
-<div id="stage" aria-label="Photo preview and eyebrow guide">
-<div class="empty" id="empty">Your photo will appear here.<br>Take a picture or choose one from your device.</div>
-<img id="photo" alt="Your selected face photo" hidden>
-<svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden aria-label="Eyebrow style overlay">
-<path id="leftBrow" fill="#65443f" fill-opacity=".72" stroke="#4a302d" stroke-width=".35" stroke-linejoin="round"/>
-<path id="rightBrow" fill="#65443f" fill-opacity=".72" stroke="#4a302d" stroke-width=".35" stroke-linejoin="round"/>
-<g id="handles"></g>
-</svg>
+<p class="small">Allow camera access when your browser asks. Face the camera in even lighting and keep your forehead and both eyebrows visible. Your camera frames are processed in your browser.</p>
+<div id="stage">
+<div class="empty" id="empty">Tap “Start live camera” or choose a photo to begin.</div>
+<video id="liveVideo" autoplay playsinline muted hidden style="display:block;width:100%;height:auto;max-height:70vh;object-fit:contain"></video>
+<img id="photo" alt="Captured face frame" hidden>
+<svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" hidden></svg>
 </div>
-<div class="status" id="status" style="margin-top:10px">Choose a photo to begin. Your photo stays on this device; it is not uploaded by this page.</div>
+<div class="status" id="status">Start the live camera and capture a frame, or choose a photo. Then tap “Detect my brows.”</div>
 </section>
 <section class="panel">
-<h2>2. Choose a brow style</h2>
-<div class="styles" id="styles">
-<button class="style" data-style="natural" aria-pressed="true"><strong>Natural</strong><span>Soft, everyday shape</span></button>
-<button class="style" data-style="straight" aria-pressed="false"><strong>Straight</strong><span>Gentle, flatter arch</span></button>
-<button class="style" data-style="arched" aria-pressed="false"><strong>Defined arch</strong><span>More lifted peak</span></button>
-<button class="style" data-style="bold" aria-pressed="false"><strong>Full & bold</strong><span>Thicker, fuller brow</span></button>
-<button class="style" data-style="soft" aria-pressed="false"><strong>Soft rounded</strong><span>Rounded, gentle curve</span></button>
-<button class="style" data-style="thin" aria-pressed="false"><strong>Fine & subtle</strong><span>Light, slim brow</span></button>
-</div>
+<h2>2. Your recommendation</h2>
+<p id="recommendation">Your recommended brow shape will appear here after detection.</p>
 </section>
 <section class="panel">
-<h2>3. Adjust the look</h2>
+<h2>3. Personalize the diagram</h2>
 <div class="controls">
-<div><label for="thickness">Brow thickness</label><input id="thickness" type="range" min="1" max="9" value="5"><div class="small">Slim ↔ full</div></div>
-<div><label for="darkness">Color intensity</label><input id="darkness" type="range" min="25" max="100" value="72"><div class="small">Soft ↔ bold</div></div>
-<div><label for="color">Brow color</label><select id="color"><option value="#65443f">Dark brown</option><option value="#8a5d4a">Warm brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option><option value="#7c6260">Taupe</option></select></div>
-<div><label for="side">Move which brow?</label><select id="side"><option value="both">Both brows</option><option value="left">Left side of photo</option><option value="right">Right side of photo</option></select></div>
+<div><label for="style">Brow shape</label><select id="style"><option value="auto">Best match (recommended)</option><option value="natural">Natural soft arch</option><option value="straight">Straighter brow</option><option value="arched">More defined arch</option><option value="rounded">Soft rounded arch</option></select></div>
+<div><label for="color">Guide color</label><select id="color"><option value="#8b514c">Rose brown</option><option value="#65443f">Dark brown</option><option value="#3e302d">Deep brown</option><option value="#a87963">Light brown</option><option value="#2c2525">Soft black</option></select></div>
 </div>
-<p class="small">Tip: drag the three guide dots for the selected brow. Move Start to the inner corner, Arch above the highest point, and End toward the outer corner. The labels are shown while adjusting.</p>
-</section>
-<section class="panel">
-<h2>4. Make it fit your face</h2>
-<p style="margin-top:0">The guide starts in a sample position. After adding your photo, drag the dots to line the brow shape up with your real eyebrows. This version overlays a style guide; it does not automatically recognize facial landmarks.</p>
-<div class="actions"><button class="primary" id="save">Save preview image</button><button class="secondary" id="clear">Remove photo</button></div>
-<p class="small">Save preview exports the photo with the brow overlay as an image.</p>
+<p class="small">The diagram uses detected facial landmarks to estimate brow placement. It is a cosmetic guide, not a professional measurement.</p>
+<div class="actions"><button class="primary" id="save" disabled>Save diagram</button><button class="secondary" id="clear">Remove photo</button></div>
 </section>
 </main>
-<footer>BrowGuide is a makeup planning aid. Check the shape in a mirror before grooming or removing hair.</footer>
-<script>
-(() => {
+<footer>For best results, check the guide in a mirror before grooming. Face shape alone cannot determine personal style or preference.</footer>
+<script type="module">
+import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
 const $ = id => document.getElementById(id);
-const photo=$('photo'), overlay=$('overlay'), empty=$('empty'), stage=$('stage'), status=$('status');
-let imageUrl=null, active='natural', dragging=null;
-const state={
- left:{start:[30,42],arch:[39,38],end:[47,42]},
- right:{start:[53,42],arch:[62,38],end:[70,42]}
+const photo=$('photo'), overlay=$('overlay'), empty=$('empty'), status=$('status');
+let faceLandmarker=null, imageUrl=null, detected=null, cameraStream=null, facingMode='user';
+let selectedStyle='auto', selectedColor=$('color').value;
+
+const styles={
+ natural:{name:'Natural soft arch', lift:0, thickness:1, round:1},
+ straight:{name:'Straighter brow', lift:0.012, thickness:.9, round:.5},
+ arched:{name:'Defined arch', lift:-0.018, thickness:1.05, round:1.1},
+ rounded:{name:'Soft rounded arch', lift:-0.006, thickness:1, round:1.4}
 };
-const presets={
- natural:{arch:0,width:1.0,curve:1.0},
- straight:{arch:2,width:.95,curve:.55},
- arched:{arch:-4,width:1.0,curve:1.25},
- bold:{arch:-1,width:1.55,curve:1.05},
- soft:{arch:-1,width:1.05,curve:1.45},
- thin:{arch:0,width:.52,curve:.9}
-};
-function isReady(){return !photo.hidden}
-function getViewSize(){return {w:100,h:100}}
-function pathFor(points, side){
- const preset=presets[active], thick=Number($('thickness').value)*.34*preset.width;
- const [sx,sy]=points.start,[ax,ay]=points.arch,[ex,ey]=points.end;
- const archY=ay+preset.arch;
- const dx1=ax-sx, dx2=ex-ax;
- const upper=`M ${sx} ${sy} Q ${sx+dx1*.55} ${sy-1.8*preset.curve} ${ax} ${archY} Q ${ax+dx2*.45} ${archY-1.5*preset.curve} ${ex} ${ey}`;
- const lower=`L ${ex} ${ey+thick*.55} Q ${ax+dx2*.4} ${archY+thick*.95} ${ax} ${archY+thick} Q ${sx+dx1*.5} ${sy+thick*.8} ${sx} ${sy+thick*.55} Z`;
- return upper+' '+lower;
+
+async function getDetector(){
+ if(faceLandmarker)return faceLandmarker;
+ status.textContent='Loading the face-detection model… keep this page open for a moment.';
+ const files=await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+ faceLandmarker=await FaceLandmarker.createFromOptions(files,{
+  baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'CPU'},
+  runningMode:'IMAGE',numFaces:1,outputFaceBlendshapes:false,outputFacialTransformationMatrixes:false
+ });
+ return faceLandmarker;
 }
-function render(){
- if(!isReady())return;
- for(const side of ['left','right']){
-  $(side+'Brow').setAttribute('d',pathFor(state[side],side));
-  $(side+'Brow').setAttribute('fill',$('color').value);
-  $(side+'Brow').setAttribute('fill-opacity',Number($('darkness').value)/100);
-  $(side+'Brow').setAttribute('stroke',$('color').value);
-  $(side+'Brow').setAttribute('stroke-width',String(Number($('thickness').value)*.045));
+async function startCamera(){
+ try{
+  stopCamera();
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+   status.textContent='This browser does not support live camera access. Open the secure GitHub Pages website in Safari or Chrome and try again.';
+   return;
+  }
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facingMode},width:{ideal:1280},height:{ideal:720}},audio:false});
+  const video=$('liveVideo');video.srcObject=cameraStream;video.hidden=false;photo.hidden=true;overlay.hidden=true;empty.hidden=true;
+  await video.play();
+  $('startCamera').disabled=true;$('switchCamera').disabled=false;$('capture').disabled=false;$('stopCamera').disabled=false;
+  $('status').textContent='Live camera is on. Center your face, then tap “Use this frame” to analyze and draw the brow guide.';
+ }catch(err){
+  status.textContent=err.name==='NotAllowedError'
+   ?'Camera permission was denied. Allow camera access in your browser settings, then tap Start live camera again.'
+   :'Could not start the camera. Make sure no other app is using it and try again.';
  }
- const group=$('handles');group.innerHTML='';
- const which=$('side').value;
- for(const side of ['left','right']){
-  if(which!=='both'&&which!==side)continue;
-  for(const key of ['start','arch','end']){
-   const [x,y]=state[side][key];
+}
+function stopCamera(){
+ if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null;}
+ const video=$('liveVideo');if(video){video.pause();video.srcObject=null;video.hidden=true;}
+ if($('startCamera'))$('startCamera').disabled=false;
+ if($('switchCamera'))$('switchCamera').disabled=true;
+ if($('capture'))$('capture').disabled=true;
+ if($('stopCamera'))$('stopCamera').disabled=true;
+}
+function captureFrame(){
+ const video=$('liveVideo');
+ if(!cameraStream || !video.videoWidth){status.textContent='Start the camera and wait until your face appears, then try again.';return;}
+ const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+ const ctx=canvas.getContext('2d');
+ // Mirror the front-camera preview in the saved/analyzed frame so it matches what the user sees.
+ if(facingMode==='user'){ctx.translate(canvas.width,0);ctx.scale(-1,1);}
+ ctx.drawImage(video,0,0,canvas.width,canvas.height);
+ canvas.toBlob(blob=>{
+  if(!blob){status.textContent='Could not capture this frame. Please try again.';return;}
+  if(imageUrl)URL.revokeObjectURL(imageUrl);
+  imageUrl=URL.createObjectURL(blob);detected=null;
+  photo.onload=()=>{
+   photo.hidden=false;overlay.hidden=true;$('liveVideo').hidden=true;
+   $('analyze').disabled=false;$('save').disabled=true;
+   $('recommendation').textContent='Captured frame ready. Tap “Detect my brows” to analyze it.';
+   status.textContent='Frame captured. Tap “Detect my brows” to draw the guide. Start the camera again to capture another frame.';
+  };
+  photo.src=imageUrl;
+ },'image/jpeg',.92);
+}
+function lmToView(lm){
+ // The image is displayed at full width with object-fit:contain; calculate the image area inside the stage.
+ const sr=$('stage').getBoundingClientRect();
+ const pr=photo.getBoundingClientRect();
+ return {x:(lm.x*photo.naturalWidth*pr.width/photo.naturalWidth + pr.left-sr.left)/sr.width*100,
+         y:(lm.y*pr.height + pr.top-sr.top)/sr.height*100};
+}
+function points(indices, landmarks){return indices.map(i=>lmToView(landmarks[i]))}
+function curvePath(pts, style, color){
+ // Draw a clean, filled brow band following the detected brow contour.
+ const s=styles[style], p=pts;
+ if(p.length<3)return '';
+ // Identify endpoints and lift the centre slightly for the chosen style.
+ const start=p[0], end=p[p.length-1], mid=p[Math.floor(p.length/2)];
+ const xs=p.map(a=>a.x), ys=p.map(a=>a.y);
+ const minX=Math.min(...xs), maxX=Math.max(...xs), span=maxX-minX;
+ const centerX=mid.x, centerY=mid.y+s.lift*100;
+ const top=p.map((a,i)=>({x:a.x,y:a.y + (i===0||i===p.length-1?0:-.4*s.round)}));
+ const upper=top.map((a,i)=>`${i===0?'M':'L'} ${a.x.toFixed(2)} ${a.y.toFixed(2)}`).join(' ');
+ const width=Math.max(1.0, Math.min(3.4, span*.12))*s.thickness;
+ const lower=top.slice().reverse().map((a,i)=>`L ${a.x.toFixed(2)} ${(a.y+width).toFixed(2)}`).join(' ');
+ return `${upper} ${lower} Z`;
+}
+function draw(){
+ if(!detected)return;
+ const landmarks=detected;
+ const left=points([70,63,105,66,107],landmarks);
+ const right=points([336,296,334,293,300],landmarks);
+ // Keep each group in left-to-right screen order so the filled band follows the brow line.
+ left.sort((a,b)=>a.x-b.x);right.sort((a,b)=>a.x-b.x);
+ let style=$('style').value;
+ if(style==='auto')style='natural';
+ const chosen=styles[style];
+ const leftPath=curvePath(left,style,selectedColor), rightPath=curvePath(right,style,selectedColor);
+ overlay.innerHTML='';
+ for(const [d,side] of [[leftPath,'left'],[rightPath,'right']]){
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',d);path.setAttribute('fill',selectedColor);path.setAttribute('fill-opacity','.82');
+  path.setAttribute('stroke',selectedColor);path.setAttribute('stroke-width','.18');path.setAttribute('stroke-linejoin','round');
+  overlay.appendChild(path);
+ }
+ // Add small placement marks and labels near the ends and arch of each detected brow.
+ for(const arr of [left,right]){
+  if(arr.length<3)continue;
+  const marks=[['Start',arr[0]],['Arch',arr[Math.floor(arr.length/2)]],['End',arr[arr.length-1]]];
+  for(const [label,pt] of marks){
    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-   c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r','1.35');
-   c.setAttribute('fill','#fff');c.setAttribute('stroke','#b96d78');c.setAttribute('stroke-width','.55');
-   c.dataset.side=side;c.dataset.point=key;c.style.cursor='grab';group.appendChild(c);
+   c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y);c.setAttribute('r','.65');c.setAttribute('fill','#fff');c.setAttribute('stroke',selectedColor);c.setAttribute('stroke-width','.3');overlay.appendChild(c);
    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-   t.setAttribute('x',x);t.setAttribute('y',y-2);t.setAttribute('font-size','2.6');t.setAttribute('text-anchor','middle');t.setAttribute('fill','#fff');t.setAttribute('stroke','#4b2c32');t.setAttribute('stroke-width','.18');t.setAttribute('paint-order','stroke');t.textContent=key==='start'?'Start':key==='arch'?'Arch':'End';group.appendChild(t);
+   t.setAttribute('x',pt.x);t.setAttribute('y',pt.y-1.15);t.setAttribute('font-size','1.8');t.setAttribute('text-anchor','middle');t.setAttribute('fill','#fff');t.setAttribute('stroke','#34262a');t.setAttribute('stroke-width','.12');t.setAttribute('paint-order','stroke');t.textContent=label;overlay.appendChild(t);
   }
  }
+ overlay.hidden=false;
+ $('save').disabled=false;
 }
-function loadFile(file){
- if(!file)return;
- if(!file.type.startsWith('image/')){status.textContent='Please choose an image file.';return}
- if(imageUrl)URL.revokeObjectURL(imageUrl);
- imageUrl=URL.createObjectURL(file);
- photo.onload=()=>{
-  photo.hidden=false;empty.hidden=true;overlay.hidden=false;
-  const rect=stage.getBoundingClientRect();
-  overlay.setAttribute('viewBox','0 0 100 100');
-  status.textContent='Photo ready. Choose a style, then drag the Start, Arch, and End dots to line up each brow.';
-  render();
- };
- photo.onerror=()=>{status.textContent='That photo could not be opened. Please try another image.'};
+async function analyze(){
+ if(!photo.src||photo.hidden)return;
+ $('analyze').disabled=true;
+ try{
+  const detector=await getDetector();
+  const result=detector.detect(photo);
+  if(!result.faceLandmarks||!result.faceLandmarks.length){
+   detected=null;overlay.hidden=true;
+   status.textContent='I could not detect a face. Try a front-facing photo with better lighting and both brows visible.';
+   $('recommendation').textContent='No face was detected, so I cannot recommend a placement yet.';
+   return;
+  }
+  detected=result.faceLandmarks[0];
+  const width=Math.abs(detected[70].x-detected[300].x);
+  const eyeDist=Math.abs(detected[33].x-detected[263].x);
+  // A conservative heuristic: suggest a soft natural arch as the default rather than claiming to know beauty preferences.
+  let suggestion='Natural soft arch';
+  if(width>eyeDist*1.25)suggestion='Natural soft arch';
+  selectedStyle='auto';$('style').value='auto';
+  draw();
+  $('recommendation').textContent=`Recommended starting point: ${suggestion}. The detected landmarks suggest using your natural brow line and a gentle arch. The diagram marks estimated Start, Arch, and End points on both brows. You can switch the guide shape below if you prefer a different look.`;
+  status.textContent='Face detected. Brow guide drawn on your photo. If the overlay is not perfectly aligned, use a clearer, straight-on photo.';
+ }catch(err){
+  console.error(err);
+  status.textContent='The face-detection model could not load. Check your internet connection, then try Detect my brows again.';
+ }finally{$('analyze').disabled=false}
+}
+$('fileInput').addEventListener('change',event=>{
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ stopCamera();if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(file);detected=null;
+ photo.onload=()=>{photo.hidden=false;overlay.hidden=true;empty.hidden=true;$('liveVideo').hidden=true;$('analyze').disabled=false;$('save').disabled=true;$('recommendation').textContent='Photo ready. Tap “Detect my brows” to analyze it.';status.textContent='Photo loaded. Tap “Detect my brows” to draw your brow guide.'};
  photo.src=imageUrl;
-}
-$('camera').addEventListener('change',e=>loadFile(e.target.files[0]));
-$('upload').addEventListener('change',e=>loadFile(e.target.files[0]));
-document.querySelectorAll('[data-style]').forEach(btn=>btn.addEventListener('click',()=>{
- active=btn.dataset.style;
- document.querySelectorAll('[data-style]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
- render();
-}));
-['thickness','darkness','color','side'].forEach(id=>$(id).addEventListener('input',render));
-function pointFromEvent(e){
- const r=overlay.getBoundingClientRect();
- return [Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)),Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100))];
-}
-overlay.addEventListener('pointerdown',e=>{
- const target=e.target;
- if(target.tagName.toLowerCase()!=='circle')return;
- dragging={side:target.dataset.side,point:target.dataset.point};
- overlay.setPointerCapture(e.pointerId);e.preventDefault();
 });
-overlay.addEventListener('pointermove',e=>{
- if(!dragging)return;
- const [x,y]=pointFromEvent(e);
- state[dragging.side][dragging.point]=[x,y];
- render();
-});
-overlay.addEventListener('pointerup',()=>dragging=null);
-overlay.addEventListener('pointercancel',()=>dragging=null);
-$('reset').addEventListener('click',()=>{
- state.left={start:[30,42],arch:[39,38],end:[47,42]};
- state.right={start:[53,42],arch:[62,38],end:[70,42]};
- render();status.textContent='Guide points reset to the sample position. Drag them to fit your photo.';
-});
+$('startCamera').addEventListener('click',startCamera);
+$('switchCamera').addEventListener('click',async()=>{facingMode=facingMode==='user'?'environment':'user';await startCamera()});
+$('capture').addEventListener('click',captureFrame);
+$('stopCamera').addEventListener('click',()=>{stopCamera();status.textContent='Camera stopped.'});
+$('analyze').addEventListener('click',analyze);
+$('style').addEventListener('change',()=>{selectedStyle=$('style').value;if(detected)draw()});
+$('color').addEventListener('change',()=>{selectedColor=$('color').value;if(detected)draw()});
 $('clear').addEventListener('click',()=>{
- if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=null;photo.removeAttribute('src');photo.hidden=true;overlay.hidden=true;empty.hidden=false;
- $('camera').value='';$('upload').value='';status.textContent='Choose a photo to begin. Your photo stays on this device.';
+ stopCamera();
+ if(imageUrl)URL.revokeObjectURL(imageUrl);
+ imageUrl=null;detected=null;photo.removeAttribute('src');photo.hidden=true;overlay.hidden=true;overlay.innerHTML='';empty.hidden=false;
+ $('analyze').disabled=true;$('save').disabled=true;
+ $('status').textContent='Tap Start live camera to begin.';$('recommendation').textContent='Your recommended brow shape will appear here after detection.';
 });
 $('save').addEventListener('click',()=>{
- if(!isReady()){status.textContent='Add a photo first, then save your preview.';return}
- const w=photo.naturalWidth,h=photo.naturalHeight;
- const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+ if(!detected||photo.hidden)return;
+ const w=photo.naturalWidth,h=photo.naturalHeight,canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
  const ctx=canvas.getContext('2d');ctx.drawImage(photo,0,0,w,h);
- // Overlay uses a 0–100 coordinate system covering the image display box.
- const left=stage.getBoundingClientRect(), pr=photo.getBoundingClientRect();
- const scaleX=w/pr.width, scaleY=h/pr.height;
- ctx.save();ctx.scale(w/100,h/100);
- for(const side of ['left','right']){
-  const p=state[side],preset=presets[active],thick=Number($('thickness').value)*.34*preset.width;
-  const [sx,sy]=p.start,[ax,ay]=p.arch,[ex,ey]=p.end,dx1=ax-sx,dx2=ex-ax,archY=ay+preset.arch;
-  ctx.beginPath();ctx.moveTo(sx,sy);ctx.quadraticCurveTo(sx+dx1*.55,sy-1.8*preset.curve,ax,archY);ctx.quadraticCurveTo(ax+dx2*.45,archY-1.5*preset.curve,ex,ey);ctx.lineTo(ex,ey+thick*.55);ctx.quadraticCurveTo(ax+dx2*.4,archY+thick*.95,ax,archY+thick);ctx.quadraticCurveTo(sx+dx1*.5,sy+thick*.8,sx,sy+thick*.55);ctx.closePath();
-  ctx.globalAlpha=Number($('darkness').value)/100;ctx.fillStyle=$('color').value;ctx.fill();ctx.globalAlpha=1;
+ const stageRect=$('stage').getBoundingClientRect(),photoRect=photo.getBoundingClientRect();
+ const scaleX=stageRect.width/100,scaleY=stageRect.height/100;
+ for(const path of overlay.querySelectorAll('path')){
+  // SVG path geometry is scaled from stage coordinates into original photo pixels.
+  const svgPath=new Path2D(path.getAttribute('d'));
+  ctx.save();ctx.translate(-(photoRect.left-stageRect.left)/stageRect.width*100,-(photoRect.top-stageRect.top)/stageRect.height*100);
+  ctx.scale(w/photoRect.width*stageRect.width/100,h/photoRect.height*stageRect.height/100);
+  ctx.fillStyle=selectedColor;ctx.globalAlpha=.82;ctx.fill(svgPath);ctx.restore();
  }
- ctx.restore();
+ // Draw the placement dots as a simple visible reference on the saved image.
  canvas.toBlob(blob=>{
-  if(!blob){status.textContent='Could not create the preview. Try again.';return}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BrowGuide-preview.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  status.textContent='Preview saved. Check your device’s Downloads or Photos.';
+  if(!blob){status.textContent='Could not save the image. Please try again.';return}
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BrowGuide-recommended-diagram.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);
+  status.textContent='Your brow diagram has been saved to your device.';
  },'image/png');
 });
-})();
 </script>
 </body>
 </html>
